@@ -51,7 +51,7 @@ namespace augs {
 Given this introspector body format:
 
 ```cpp
-  	template <bool C, class F>
+  	template <bool C, class F%x>
   	void introspect(
   		maybe_const_ref_t<C, %x> t,
   		F f
@@ -99,4 +99,50 @@ namespace augs {
 
 	}
 }
+```
+
+It also works with templated types.
+
+Example input:
+
+```cpp
+template <class id_type>
+struct basic_inventory_slot_id {
+	// GEN INTROSPECTOR basic_inventory_slot_id class id_type
+	slot_function type;
+	id_type container_entity;
+	// END GEN INTROSPECTOR
+
+	basic_inventory_slot_id();
+	basic_inventory_slot_id(const slot_function, const id_type);
+
+	void unset();
+
+	bool operator<(const basic_inventory_slot_id b) const;
+	bool operator==(const basic_inventory_slot_id b) const;
+	bool operator!=(const basic_inventory_slot_id b) const;
+};
+```
+
+Example output:
+
+```cpp
+template <bool C, class F, class id_type>
+void introspect(
+	maybe_const_ref_t<C, basic_inventory_slot_id<id_type>> t,
+	F f
+) {
+	f(t.NVP(type));
+	f(t.NVP(container_entity));
+
+}
+```
+
+You can use more template arguments, just separate each by a space, for example
+
+class T size_t count
+
+for a template with suchlike arguments:
+```cpp
+<class T, size_t count>
 ```

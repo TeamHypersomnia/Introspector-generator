@@ -138,7 +138,45 @@ int main() {
 						const auto found_gen_begin = lines[current_line].find(beginning_sequence);
 
 						if (found_gen_begin != std::string::npos) {
-							std::string type_name = lines[current_line].substr(found_gen_begin + beginning_sequence.length());
+							const auto after_gen = lines[current_line].substr(found_gen_begin + beginning_sequence.length());
+							std::istringstream in(after_gen);
+
+							std::string type_name;
+
+							std::string argument_template_arguments;
+							std::string template_template_arguments;
+
+							in >> type_name;
+
+							std::vector <std::pair<std::string, std::string>> template_arguments;
+
+							std::string template_arg_type;
+							std::string template_arg_name;
+
+							while (in >> template_arg_type) {
+								in >> template_arg_name;
+
+								template_arguments.push_back({ template_arg_type, template_arg_name });
+							}
+
+							if (template_arguments.size() > 0) {
+								argument_template_arguments = "<";
+								template_template_arguments = ", ";
+
+								for (size_t a = 0; a < template_arguments.size(); ++a) {
+									argument_template_arguments += template_arguments[a].second;
+									template_template_arguments += template_arguments[a].first + " " + template_arguments[a].second;
+
+									if (a != template_arguments.size() - 1) {
+										argument_template_arguments += ", ";
+										template_template_arguments += ", ";
+									}
+								}
+
+								argument_template_arguments += ">";
+
+								type_name += argument_template_arguments;
+							}
 
 							std::string generated_fields;
 
@@ -192,7 +230,8 @@ int main() {
 							}
 
 							generated_introspectors += typesafe_sprintf(
-								introspector_body_format, 
+								introspector_body_format,
+								template_template_arguments,
 								type_name,
 								generated_fields
 							);
