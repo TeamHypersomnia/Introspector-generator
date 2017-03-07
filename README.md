@@ -13,6 +13,11 @@ Why not choose this approach?
 * If you have classes with mostly private members, well, RIP - it won't save you the typing required for befriending the introspectors, which can get quite annoying. Unless you do the introspection some other way where you befriend something like boost::access.
 * If you feel bad for having your computer write code for you, well, that's a reason I guess.
 
+Usage:
+
+1. Paste // GEN INTROSPECTOR [type] [template arg1] [template arg name2] [template arg1] [template arg name2] ...
+2. Paste // END GEN INTROSPECTOR after all the introspected members.
+
 Example:
 
 Given suchlike structures:
