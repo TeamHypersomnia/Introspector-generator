@@ -39,7 +39,6 @@ Given suchlike structures:
 Given this output file format:
 
 ```cpp
-#include "game/transcendental/types_specification/all_components_declaration.h"
 #include "augs/image/image.h"
 
 #define NVP(x) x, #x
