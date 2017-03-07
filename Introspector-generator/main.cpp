@@ -140,11 +140,6 @@ int main() {
 						if (found_gen_begin != std::string::npos) {
 							std::string type_name = lines[current_line].substr(found_gen_begin + beginning_sequence.length());
 
-							//std::string generated_introspector;
-							//generated_introspector += introspector_begin_start;
-							//generated_introspector += type_name;
-							//generated_introspector += introspector_begin_end;
-
 							std::string generated_fields;
 
 							while (true) {
@@ -157,7 +152,7 @@ int main() {
 								}
 								
 								if (std::all_of(new_field_line.begin(), new_field_line.end(), isspace)) {
-									//generated_introspector += new_field_line + "\n";
+									generated_fields += new_field_line + "\n";
 									continue;
 								}
 
