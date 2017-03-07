@@ -3,7 +3,7 @@ Small utility that generates introspector functions into a separate file, from c
 
 Why choose this approach?
 
-* You don't have to use macro hacks, so when you suddenly realize that you don't need introspection in your code, you are left  with a handful of comments instead of some crazy syntax.
+* You don't have to use macro hacks like ```(int) field, (double) other``` so when you suddenly realize that you don't need introspection in your code, you are left  with a handful of comments instead of some crazy syntax.
 * The aforementioned macros require boost, don't they? So that's one dependency less.
 * I don't put the introspectors inside the class definitions in order to:
 	1. not have to duplicate the code for const/non-const variations
