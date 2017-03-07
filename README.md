@@ -1,5 +1,17 @@
 # Introspector-generator
-Small utility that generates introspector functions from comments in the code
+Small utility that generates introspector functions into a separate file, from comments in the code.
+
+Why choose this approach?
+
+* You don't have to use macro hacks, so when you suddenly realize that you don't need introspection in your code, you are left  with a handful of comments instead of some crazy syntax.
+* The aforementioned macros require boost, don't they? So that's one dependency less.
+* I don't put the introspectors inside the class definitions in order to:
+	1. not have to duplicate the code for const/non-const variations
+	2. not involve the introspection code where it is clearly not needed - that should speed up build times. The only compilation units which require introspection logic are mostly related to i/o, and they make up a tiny percentage of source files.
+
+Why not choose this approach?
+* If you have classes with mostly private members, well, RIP - it won't save you the typing required for befriending the introspectors, which can get quite annoying. Unless you do the introspection some other way where you befriend something like boost::access.
+* If you feel bad for having your computer write code for you, well, that's a reason I guess.
 
 Example:
 
