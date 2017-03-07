@@ -15,7 +15,7 @@ Why not choose this approach?
 
 Usage:
 
-1. Paste ``` // GEN INTROSPECTOR [type] [template arg1] [template arg name2] [template arg1] [template arg name2] ...``` before the introspected members.
+1. Paste ``` // GEN INTROSPECTOR [type] [template arg1] [template arg name2] [template arg2] [template arg name2] ...``` before the introspected members.
 2. Paste ``` // END GEN INTROSPECTOR``` after all the introspected members.
 
 Keywords for the starting and finishing comments may be modified in ```beginning_sequence.txt``` and ```ending_sequence.txt```.
