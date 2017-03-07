@@ -3,6 +3,5 @@
 		maybe_const_ref_t<C, %x> t,
 		F f
 	) {
-%x
-	}
+%x	}
 
