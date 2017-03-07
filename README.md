@@ -3,7 +3,7 @@ Small utility that generates introspector functions into a separate file, from c
 
 Why choose this approach?
 
-* You don't have to use macro hacks like ```(int) field, (double) other``` so when you suddenly realize that you don't need introspection in your code, you are left  with a handful of comments instead of some crazy syntax.
+* You don't have to use macro hacks like ```(int) field, (double) other``` so when you suddenly realize that you don't need introspection in your code, you are left  with a handful of comments instead of some crazy syntax. Don't even get me started about the abominations that you need to include every time in order to even get it working.
 * The aforementioned macros require boost, don't they? So that's one dependency less.
 * I don't put the introspectors inside the class definitions in order to:
 	1. not have to duplicate the code for const/non-const variations
@@ -59,8 +59,7 @@ namespace augs {
 %x
 }
  ```
-
-Given this introspector body format:
+where ```%x``` is the place where all resultant introspectors will be pasted, and given this introspector body format:
 
 ```cpp
   	template <bool C, class F%x>
@@ -72,13 +71,13 @@ Given this introspector body format:
   	}
 ```
 
-Given this field format:
+where ```%x``` are the places where the generator will put template arguments, type name and the generated fields respectively,
+and given this field format:
 
 ```cpp
 		f(t.NVP(%x));    
 ```
-
-The program will generate this file to a given path:
+where ```%x``` is the place where the field's name will be pasted, the program will generate this exact file to a given path:
 
 ```cpp
 #include "augs/image/image.h"
@@ -112,6 +111,8 @@ namespace augs {
 	}
 }
 ```
+
+Notice how the algorihtm skips the fields named ```pad```.
 
 It also works with templated types.
 
