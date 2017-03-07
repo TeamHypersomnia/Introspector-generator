@@ -4,6 +4,9 @@
 #include <utility>
 #include <type_traits>
 #include <limits>
+#include <fstream>
+#include <cassert>
+#include <experimental\filesystem>
 
 template <typename CharType>
 void typesafe_sprintf_detail(size_t, std::basic_string<CharType>&) {
@@ -58,13 +61,6 @@ std::wstring typesafe_sprintf(const wchar_t* const c_str, A&&... a) {
 	return f;
 }
 
-#include <experimental\filesystem>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <cassert>
-
 namespace fs = std::experimental::filesystem;
 
 std::vector<std::string> get_file_lines(const std::string& filename) {
@@ -107,15 +103,15 @@ int main() {
 	// std::string exts[] = { ".h" };
 	const auto dirs = get_file_lines("directories.txt");
 
-	const std::string beginning_sequence = get_file_contents("beginning_sequence.txt");
-	const std::string ending_sequence = get_file_contents("ending_sequence.txt");
+	const auto beginning_sequence = get_file_contents("beginning_sequence.txt");
+	const auto ending_sequence = get_file_contents("ending_sequence.txt");
 
-	const std::string introspector_body_format = get_file_contents("introspector_body_format.txt");
-	const std::string introspector_field_format = get_file_contents("introspector_field_format.txt");
+	const auto introspector_body_format = get_file_contents("introspector_body_format.txt");
+	const auto introspector_field_format = get_file_contents("introspector_field_format.txt");
 
-	const std::string introspect_file_format_path = get_file_contents("introspect_file_format_path.txt");
-	const std::string introspect_file_format = get_file_contents(introspect_file_format_path);
-	const std::string output_path = get_file_contents("output_path.txt");
+	const auto introspect_file_format_path = get_file_contents("introspect_file_format_path.txt");
+	const auto introspect_file_format = get_file_contents(introspect_file_format_path);
+	const auto output_path = get_file_contents("output_path.txt");
 	
 	std::string generated_introspectors;
 
@@ -125,14 +121,9 @@ int main() {
 				const auto path = i->path();
 				
 				if (path.extension() == ".h") {
-
 					const auto lines = get_file_lines(path.string());
 
 					size_t current_line = 0;
-
-					if(path.filename() == "config_lua_table.h") {
-						current_line = 0;
-					}
 
 					while (current_line < lines.size()) {
 						const auto found_gen_begin = lines[current_line].find(beginning_sequence);
