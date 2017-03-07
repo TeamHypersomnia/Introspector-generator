@@ -1,0 +1,3 @@
+P:/Projects/Hypersomnia/augs
+P:/Projects/Hypersomnia/game
+P:/Projects/Hypersomnia/application

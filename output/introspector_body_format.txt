@@ -1,0 +1,8 @@
+	template <bool C, class F>
+	void introspect(
+		maybe_const_ref_t<C, %x> t,
+		F f
+	) {
+%x
+	}
+
