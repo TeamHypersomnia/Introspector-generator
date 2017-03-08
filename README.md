@@ -26,17 +26,21 @@ What the algorithm preserves:
 
 What the algorithm skips:
 * Fields named ```pad``` (for my internal usage).
-* Lines with friend declarations
-* Lines with public/private/protected specifiers
+* Lines with friend declarations.
+* Lines with public/private/protected specifiers.
 
 What **cannot** be found between the // GEN and // END GEN comments:
 
-* Members that occupy more than one, or multiple members per line. In particular, these:
+* Members that occupy more than one line, multiple members per line and members separated by a comma per line. In particular, these:
 ```cpp
 int
 member;
 
 int a, b, c;
+int 
+d,
+e,
+f;
 ```
 are examples of wrong usage.
 * C-style arrays. Use std::array instead.
@@ -149,7 +153,7 @@ Example input:
 ```cpp
 template <class id_type>
 struct basic_inventory_slot_id {
-	// GEN INTROSPECTOR basic_inventory_slot_id class id_type
+	// GEN INTROSPECTOR struct basic_inventory_slot_id class id_type
 	slot_function type;
 	id_type container_entity;
 	// END GEN INTROSPECTOR
