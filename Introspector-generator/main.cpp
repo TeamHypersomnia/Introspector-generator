@@ -65,7 +65,7 @@ int main() {
 									path.string(),
 									lines[current_line]
 								)
-								;
+							;
 
 							std::getchar();
 						}

@@ -15,78 +15,87 @@ Why not choose this approach?
 
 Usage:
 
-1. Paste ``` // GEN INTROSPECTOR [type] [template arg1] [template arg name1] [template arg2] [template arg name2] ...``` before the introspected members.
+1. Paste ``` // GEN INTROSPECTOR [struct|class] [type] [template arg1] [template arg name1] [template arg2] [template arg name2] ...``` before the introspected members.
 2. Paste ``` // END GEN INTROSPECTOR``` after all the introspected members.
 
 Keywords for the starting and finishing comments may be modified in ```beginning_sequence.txt``` and ```ending_sequence.txt```.
-Every member must take exactly one line. In particular, these:
-```
+
+What the algorithm preserves:
+* Macros (the first character of the line must be #)
+* Lines with only whitespaces
+
+What the algorithm skips:
+* Fields named ```pad``` (for my internal usage).
+* Lines with friend declarations
+* Lines with public/private/protected specifiers
+
+What **cannot** be found between the // GEN and // END GEN comments:
+
+* Members that occupy more than one, or multiple members per line. In particular, these:
+```cpp
 int
 member;
 
 int a, b, c;
 ```
 are examples of wrong usage.
-
-C-style arrays are disallowed. Use std::array instead.
-
-Lines with only whitespace are allowed between consecutive members.
+* C-style arrays. Use std::array instead.
+* Functions of any kind.
 
 Example:
 
 Given suchlike structures:
 
-
 ```cpp
-		struct paint_circle_midpoint_command {
-			// GEN INTROSPECTOR augs::image::paint_circle_midpoint_command
-			unsigned radius;
-			unsigned border_width = 1;
-			bool scale_alpha = false;
-			bool constrain_angle = false;
-			std::array<padding_byte, 2> pad;
-			float angle_start = 0.f;
-			float angle_end = 0.f;
-			rgba filling = white;
-			// END GEN INTROSPECTOR
+class cosmos_metadata {
+	// GEN INTROSPECTOR class cosmos_metadata
+	friend class cosmos;
 
-			static std::string get_command_name() {
-				return "circle_midpoint";
-			}
-		};
-    
-		struct paint_circle_filled_command {
-			// GEN INTROSPECTOR augs::image::paint_circle_filled_command
-			unsigned radius;
-			rgba filling = white;
-			// END GEN INTROSPECTOR
+	augs::delta delta;
+	unsigned total_steps_passed = 0;
 
-			static std::string get_command_name() {
-				return "circle_filled";
-			}
-		};    
+#if COSMOS_TRACKS_GUIDS
+	entity_guid next_entity_guid = 1;
+#endif
+public:
+	all_simulation_settings settings;
+
+	cosmos_flyweights_state flyweights;
+	// END GEN INTROSPECTOR
+};
+
+struct cosmos_significant_state {
+	// GEN INTROSPECTOR struct cosmos_significant_state
+	cosmos_metadata meta;
+
+	typename cosmos_base::aggregate_pool_type pool_for_aggregates;
+	typename cosmos_base::component_pools_type pools_for_components;
+	// END GEN INTROSPECTOR
+
+	bool operator==(const cosmos_significant_state&) const;
+	bool operator!=(const cosmos_significant_state&) const;
+}; 
 ```
 
 Given this output file format:
 
 ```cpp
-#include "augs/image/image.h"
+#pragma once
+#include "augs/templates/maybe_const.h"
 
-#define NVP(x) x, #x
-
-namespace augs {
-%x
-}
+%xnamespace augs {
+%x}
  ```
-where ```%x``` is the place where all resultant introspectors will be pasted, and given this introspector body format:
+where ```%x```  are the places where the generator will put forward declarations and resultant introspectors respectively, and given this introspector body format:
 ```cpp
-  	template <bool C, class F%x>
-  	void introspect(
-  		maybe_const_ref_t<C, %x> t,
-  		F f
-  	) {
-      %x
-  	}
+	template <bool C, class F%x>
+	void introspect(
+		maybe_const_ref_t<C, %x> t,
+		F f
+	) {
+%x	}
+
+
 ```
 (my ```maybe_const_ref_t<C, T>``` is a shorthand for ```std::conditional_t<C, const T&, T&>```)
 where ```%x``` are the places where the generator will put template arguments, type name and the generated fields respectively,
@@ -105,30 +114,33 @@ where ```%x``` is the place where the field's name will be pasted, the program w
 namespace augs {
 	template <bool C, class F>
 	void introspect(
-		maybe_const_ref_t<C, augs::image::paint_circle_midpoint_command> t,
+		maybe_const_ref_t<C, cosmos_metadata> t,
 		F f
 	) {
-		f(t.NVP(radius));
-		f(t.NVP(border_width));
-		f(t.NVP(scale_alpha));
-		f(t.NVP(constrain_angle));
-		f(t.NVP(angle_start));
-		f(t.NVP(angle_end));
-		f(t.NVP(filling));
+
+		f(t.NVP(delta));
+		f(t.NVP(total_steps_passed));
+
+#if COSMOS_TRACKS_GUIDS
+		f(t.NVP(next_entity_guid));
+#endif
+		f(t.NVP(settings));
+
+		f(t.NVP(flyweights));
 	}
 
 	template <bool C, class F>
 	void introspect(
-		maybe_const_ref_t<C, augs::image::paint_circle_filled_command> t,
+		maybe_const_ref_t<C, cosmos_significant_state> t,
 		F f
 	) {
-		f(t.NVP(radius));
-		f(t.NVP(filling));
+		f(t.NVP(meta));
+
+		f(t.NVP(pool_for_aggregates));
+		f(t.NVP(pools_for_components));
 	}
 }
 ```
-
-Notice how the algorithm skips the fields named ```pad```.
 
 It also works with templated types.
 
