@@ -79,7 +79,6 @@ namespace augs {
 }
  ```
 where ```%x``` is the place where all resultant introspectors will be pasted, and given this introspector body format:
-������
 ```cpp
   	template <bool C, class F%x>
   	void introspect(
