@@ -15,7 +15,7 @@ Why not choose this approach?
 
 Usage:
 
-1. Paste ``` // GEN INTROSPECTOR [struct|class] [type] [template arg1] [template arg name1] [template arg2] [template arg name2] ...``` before the introspected members.
+1. Paste ``` // GEN INTROSPECTOR [struct|class] [type|namespace::type] [template arg1] [template arg name1] [template arg2] [template arg name2] ...``` before the introspected members.
 2. Paste ``` // END GEN INTROSPECTOR``` after all the introspected members.
 
 Keywords for the starting and finishing comments may be modified in ```beginning_sequence.txt``` and ```ending_sequence.txt```.
@@ -206,3 +206,9 @@ for a template with suchlike arguments:
 ```cpp
 <class T, size_t count>
 ```
+
+Namespaces are respected before type names like that:
+```cpp
+// GEN INTROSPECTOR struct augs::image
+```
+They will also be correctly forward-declared, albeit only with one level of depth. Moreover, the algorithm does not recognize if an alleged namespace is actually a nested class, so this won't work with these.  
