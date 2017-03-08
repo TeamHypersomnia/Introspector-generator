@@ -181,7 +181,9 @@ int main() {
 									"private:",
 									"protected:",
 									"public:",
-									"friend "
+									"friend ",
+									"using ",
+									"typedef "
 								};
 
 								bool should_skip = false;
