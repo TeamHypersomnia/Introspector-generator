@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <map>
 
 #include "spellbook.h"
 
@@ -28,6 +29,23 @@ int main() {
 
 	std::string generated_introspectors;
 
+	std::map<std::string, std::string> namespaces;
+
+	const auto make_namespaces = [&]() {
+		std::string all;
+
+		for (const auto& n : namespaces) {
+			if (n.first == "<unnamed>") {
+				all += typesafe_sprintf("%x\n", n.second);
+			}
+			else {
+				all += typesafe_sprintf("namespace %x {\n%x}\n\n", n.first, n.second);
+			}
+		}
+
+		return all;
+	};
+
 	for (const auto dirpath : dirs) {
 		for (fs::recursive_directory_iterator i(dirpath), end; i != end; ++i) {
 			if (!is_directory(i->path())) {
@@ -45,6 +63,9 @@ int main() {
 							const auto after_gen = lines[current_line].substr(found_gen_begin + beginning_sequence.length());
 							std::istringstream in(after_gen);
 
+							std::string struct_or_class;
+							in >> struct_or_class;
+
 							std::string type_name;
 
 							std::string argument_template_arguments;
@@ -52,6 +73,8 @@ int main() {
 							
 							std::string type_name_without_templates;
 							in >> type_name_without_templates;
+
+							type_name = type_name_without_templates;
 
 							std::vector <std::pair<std::string, std::string>> template_arguments;
 
@@ -78,7 +101,47 @@ int main() {
 
 								argument_template_arguments += ">";
 
-								type_name = type_name_without_templates + argument_template_arguments;
+								type_name += argument_template_arguments;
+							}
+
+							std::string type_without_namespace = type_name_without_templates;
+							std::string namespace_of_type = "<unnamed>";
+
+							const auto found_colons = type_name_without_templates.find("::");
+
+							if (found_colons != std::string::npos) {
+								const auto& name = type_name_without_templates;
+
+								namespace_of_type = name.substr(0, found_colons);
+								type_without_namespace = name.substr(found_colons + 2);
+							}
+
+							std::vector<std::string> forward_declaration_lines;
+
+							if (template_arguments.size()) {
+								forward_declaration_lines.push_back(
+									typesafe_sprintf("template %x\n", "<" + template_template_arguments.substr(2) + ">")
+								);
+							}
+							
+							forward_declaration_lines.push_back(
+								typesafe_sprintf(
+									"%x %x;\n",
+									struct_or_class,
+									type_without_namespace
+								)
+							);
+
+							const bool should_add_tabulation = namespace_of_type != "<unnamed>";
+
+							if (should_add_tabulation) {
+								for (auto& l : forward_declaration_lines) {
+									l = "	" + l;
+								}
+							}
+
+							for (const auto& l : forward_declaration_lines) {
+								namespaces[namespace_of_type] += l;
 							}
 
 							std::string generated_fields;
@@ -163,9 +226,14 @@ int main() {
 
 								create_text_file(
 									final_path,
-									typesafe_sprintf(introspect_file_format, generated_introspectors)
+									typesafe_sprintf(
+										introspect_file_format, 
+										make_namespaces(),
+										generated_introspectors
+									)
 								);
 
+								namespaces.clear();
 								generated_introspectors.clear();
 							}
 						}
@@ -192,7 +260,11 @@ int main() {
 	else {
 		create_text_file(
 			output_path.string(),
-			typesafe_sprintf(introspect_file_format, generated_introspectors)
+			typesafe_sprintf(
+				introspect_file_format, 
+				make_namespaces(),
+				generated_introspectors
+			)
 		);
 	}
 }
