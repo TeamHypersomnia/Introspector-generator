@@ -20,9 +20,17 @@ Usage:
 
 Keywords for the starting and finishing comments may be modified in ```beginning_sequence.txt``` and ```ending_sequence.txt```.
 
+The algorithm will output a message in the console when there is a problem with processing due to bad syntax or something else.
+
 What the algorithm preserves:
-* Macros (the first character of the line must be #)
-* Lines with only whitespaces
+* Members of exactly this format:
+```cpp
+type_name member1;
+type_name member2 = some_initializator();
+```
+In particular, there must be only one space before the = sign.
+* Macros (the first character of the line must be #).
+* Lines with only whitespaces.
 
 What the algorithm skips:
 * Fields named ```pad``` (for my internal usage).
@@ -31,7 +39,7 @@ What the algorithm skips:
 
 What **cannot** be found between the // GEN and // END GEN comments:
 
-* Members that occupy more than one line, multiple members per line and members separated by a comma per line. In particular, these:
+* Members that occupy more than one line, multiple members per line and members separated by a comma. In particular, these:
 ```cpp
 int
 member;
@@ -87,6 +95,8 @@ Given this output file format:
 #pragma once
 #include "augs/templates/maybe_const.h"
 
+#define NVP(x) x, #x
+
 %xnamespace augs {
 %x}
  ```
@@ -111,9 +121,13 @@ and given this field format:
 where ```%x``` is the place where the field's name will be pasted, the program will generate this exact file to a given path:
 
 ```cpp
-#include "augs/image/image.h"
+#pragma once
+#include "augs/templates/maybe_const.h"
 
 #define NVP(x) x, #x
+
+class cosmos_metadata;
+struct cosmos_significant_state;
 
 namespace augs {
 	template <bool C, class F>
