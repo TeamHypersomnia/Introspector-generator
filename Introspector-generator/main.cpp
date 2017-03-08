@@ -56,6 +56,21 @@ int main() {
 
 					size_t current_line = 0;
 
+					const auto errcheck = [&](const bool flag) {
+						if (!flag) {
+							std::cout <<
+								typesafe_sprintf(
+									"A problem in line %x in file %x:\n%x\n",
+									current_line,
+									path.string(),
+									lines[current_line]
+								)
+								;
+
+							std::getchar();
+						}
+					};
+
 					while (current_line < lines.size()) {
 						const auto found_gen_begin = lines[current_line].find(beginning_sequence);
 
@@ -65,6 +80,8 @@ int main() {
 
 							std::string struct_or_class;
 							in >> struct_or_class;
+
+							errcheck(struct_or_class == "struct" || struct_or_class == "class");
 
 							std::string type_name;
 
@@ -149,27 +166,36 @@ int main() {
 							while (true) {
 								++current_line;
 
-								const auto errcheck = [&](const bool flag) {
-									if (!flag) {
-										std::cout << 
-											typesafe_sprintf(
-												"A problem in line %x in file %x:\n%x\n", 
-												current_line, 
-												path.string(),
-												lines[current_line]
-											)
-										;
-
-										std::getchar();
-									}
-								};
-
 								const auto& new_field_line = lines[current_line];
 
 								if (new_field_line.find(ending_sequence) != std::string::npos) {
 									break;
 								}
 								
+								if (new_field_line[0] == '#') {
+									generated_fields += new_field_line + "\n";
+									continue;
+								}
+
+								static const std::string skip_keywords[] = {
+									"private:",
+									"protected:",
+									"public:",
+									"friend "
+								};
+
+								bool should_skip = false;
+
+								for (const auto& k : skip_keywords) {
+									if (new_field_line.find(k) != std::string::npos) {
+										should_skip = true;
+									}
+								}
+
+								if (should_skip) {
+									continue;
+								}
+
 								if (std::all_of(new_field_line.begin(), new_field_line.end(), isspace)) {
 									generated_fields += new_field_line + "\n";
 									continue;
