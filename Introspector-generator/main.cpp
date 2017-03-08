@@ -1,117 +1,9 @@
 #pragma once
-#include <string>
-#include <sstream>
-#include <utility>
-#include <type_traits>
-#include <limits>
-#include <fstream>
-#include <cassert>
-#include <experimental\filesystem>
 #include <iostream>
 
-template <typename CharType>
-void typesafe_sprintf_detail(size_t, std::basic_string<CharType>&) {
-
-}
-
-template<typename CharType, typename T, typename... A>
-void typesafe_sprintf_detail(size_t starting_pos, std::basic_string<CharType>& target_str, T&& val, A&& ...a) {
-	starting_pos = target_str.find('%', starting_pos);
-
-	if (starting_pos != std::string::npos) {
-		std::basic_ostringstream<CharType> replacement;
-
-		auto opcode = target_str[starting_pos + 1];
-
-		if (opcode == L'f') {
-			replacement << std::fixed;
-			opcode = target_str[starting_pos + 2];
-		}
-
-		if (opcode >= L'0' && opcode <= L'9') {
-			replacement.precision(opcode - L'0');
-		}
-		else if (opcode == L'*') {
-			replacement.precision(std::numeric_limits<std::decay_t<T>>::digits10);
-		}
-
-		replacement << val;
-		target_str.replace(starting_pos, 2, replacement.str());
-	}
-
-	typesafe_sprintf_detail(starting_pos, target_str, std::forward<A>(a)...);
-}
-
-template<typename CharType, typename... A>
-std::basic_string<CharType> typesafe_sprintf(std::basic_string<CharType> f, A&&... a) {
-	typesafe_sprintf_detail(0, f, std::forward<A>(a)...);
-	return f;
-}
-
-template<typename... A>
-std::string typesafe_sprintf(const char* const c_str, A&&... a) {
-	auto f = std::string(c_str);
-	typesafe_sprintf_detail(0, f, std::forward<A>(a)...);
-	return f;
-}
-
-template<typename... A>
-std::wstring typesafe_sprintf(const wchar_t* const c_str, A&&... a) {
-	auto f = std::wstring(c_str);
-	typesafe_sprintf_detail(0, f, std::forward<A>(a)...);
-	return f;
-}
-
-namespace fs = std::experimental::filesystem;
-
-std::vector<std::string> get_file_lines(const std::string& filename) {
-	std::ifstream input(filename);
-
-	std::vector<std::string> out;
-
-	for (std::string line; std::getline(input, line); ) {
-		out.emplace_back(line);
-	}
-
-	return std::move(out);
-}
-
-void debugbreak() {
-	std::getchar();
-	exit(0);
-}
-
-template <class T>
-void assign_file_contents(const std::string& filename, T& target) {
-	if (!fs::exists(filename)) {
-		std::cout << typesafe_sprintf("File %x does not exist!", filename);
-		debugbreak();
-	}
-
-	std::ifstream t(filename);
-
-	t.seekg(0, std::ios::end);
-	target.reserve(static_cast<unsigned>(t.tellg()));
-	t.seekg(0, std::ios::beg);
-
-	target.assign((std::istreambuf_iterator<char>(t)),
-		std::istreambuf_iterator<char>());
-}
-
-std::string get_file_contents(std::string filename) {
-	std::string result;
-	assign_file_contents(filename, result);
-	return result;
-}
-
-template <class T>
-void create_text_file(const T& filename, const T& text) {
-	std::ofstream out(filename, std::ios::out);
-	out << text;
-}
+#include "spellbook.h"
 
 int main() {
-	// std::string exts[] = { ".h" };
 	const auto dirs = get_file_lines("directories.txt");
 
 	const auto beginning_sequence = get_file_contents("beginning_sequence.txt");
@@ -122,8 +14,18 @@ int main() {
 
 	const auto introspect_file_format_path = get_file_contents("introspect_file_format_path.txt");
 	const auto introspect_file_format = get_file_contents(introspect_file_format_path);
-	const auto output_path = get_file_contents("output_path.txt");
 	
+	const auto output_path = fs::path(get_file_contents("output_path.txt"));
+
+	bool one_introspector_per_type = false;
+
+	if (output_path.filename() == ".") {
+		fs::create_directories(output_path);
+		one_introspector_per_type = true;
+	}
+
+	std::vector<std::string> generated_files_for_inclusion;
+
 	std::string generated_introspectors;
 
 	for (const auto dirpath : dirs) {
@@ -250,6 +152,21 @@ int main() {
 								type_name,
 								generated_fields
 							);
+
+							if (one_introspector_per_type) {
+								const auto valid_type_name = replace_all(type_name, "::", "_");
+								const auto filename = "introspect_" + valid_type_name + ".h";
+								const auto final_path = output_path.string() + filename;
+								
+								generated_files_for_inclusion.push_back(filename);
+
+								create_text_file(
+									final_path,
+									typesafe_sprintf(introspect_file_format, generated_introspectors)
+								);
+
+								generated_introspectors.clear();
+							}
 						}
 
 						++current_line;
@@ -259,8 +176,22 @@ int main() {
 		}
 	}
 
-	create_text_file(
-		output_path,
-		typesafe_sprintf(introspect_file_format, generated_introspectors)
-	);
+	if (one_introspector_per_type) {
+		std::string include_all_file_contents;
+
+		for (const auto& l : generated_files_for_inclusion) {
+			include_all_file_contents += typesafe_sprintf("#include \"%x\"\n", l);
+		}
+
+		create_text_file(
+			output_path.string() + "include_all_introspectors.h",
+			include_all_file_contents
+		);
+	}
+	else {
+		create_text_file(
+			output_path.string(),
+			typesafe_sprintf(introspect_file_format, generated_introspectors)
+		);
+	}
 }
