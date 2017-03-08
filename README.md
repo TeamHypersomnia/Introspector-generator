@@ -35,6 +35,8 @@ In particular, there must be only one space before the = sign.
 What the algorithm skips:
 * Fields named ```pad``` (for my internal usage).
 * Lines with friend declarations.
+* Lines with using declarations.
+* Lines with typedef declarations.
 * Lines with public/private/protected specifiers.
 
 What **cannot** be found between the // GEN and // END GEN comments:
