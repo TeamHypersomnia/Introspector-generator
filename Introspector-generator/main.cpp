@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cassert>
 #include <experimental\filesystem>
+#include <iostream>
 
 template <typename CharType>
 void typesafe_sprintf_detail(size_t, std::basic_string<CharType>&) {
@@ -75,8 +76,18 @@ std::vector<std::string> get_file_lines(const std::string& filename) {
 	return std::move(out);
 }
 
+void debugbreak() {
+	std::getchar();
+	exit(0);
+}
+
 template <class T>
 void assign_file_contents(const std::string& filename, T& target) {
+	if (!fs::exists(filename)) {
+		std::cout << typesafe_sprintf("File %x does not exist!", filename);
+		debugbreak();
+	}
+
 	std::ifstream t(filename);
 
 	t.seekg(0, std::ios::end);
@@ -144,9 +155,7 @@ int main() {
 							std::string template_arg_type;
 							std::string template_arg_name;
 
-							while (in >> template_arg_type) {
-								in >> template_arg_name;
-
+							while (in >> template_arg_type && in >> template_arg_name) {
 								template_arguments.push_back({ template_arg_type, template_arg_name });
 							}
 
@@ -174,6 +183,21 @@ int main() {
 							while (true) {
 								++current_line;
 
+								const auto errcheck = [&](const bool flag) {
+									if (!flag) {
+										std::cout << 
+											typesafe_sprintf(
+												"A problem in line %x in file %x:\n%x\n", 
+												current_line, 
+												path.string(),
+												lines[current_line]
+											)
+										;
+
+										std::getchar();
+									}
+								};
+
 								const auto& new_field_line = lines[current_line];
 
 								if (new_field_line.find(ending_sequence) != std::string::npos) {
@@ -191,7 +215,7 @@ int main() {
 								if (found_eq != std::string::npos) {
 									const auto found_s = new_field_line.find(" =");
 
-									assert(found_s != std::string::npos);
+									errcheck(found_s != std::string::npos);
 
 									const auto field_name_beginning = new_field_line.rfind(" ", found_s - 1) + 1;
 
@@ -202,7 +226,7 @@ int main() {
 								else {
 									const auto found_s = new_field_line.find(";");
 
-									assert(found_s != std::string::npos);
+									errcheck(found_s != std::string::npos);
 
 									const auto field_name_beginning = new_field_line.rfind(" ", found_s) + 1;
 
@@ -211,7 +235,7 @@ int main() {
 									);
 								}
 
-								assert(field_name.find_first_of("[]") == std::string::npos);
+								errcheck(field_name.find_first_of("[]") == std::string::npos);
 
 								if (field_name == "pad") {
 									continue;
