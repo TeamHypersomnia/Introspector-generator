@@ -49,8 +49,9 @@ int main() {
 
 							std::string argument_template_arguments;
 							std::string template_template_arguments;
-
-							in >> type_name;
+							
+							std::string type_name_without_templates;
+							in >> type_name_without_templates;
 
 							std::vector <std::pair<std::string, std::string>> template_arguments;
 
@@ -77,7 +78,7 @@ int main() {
 
 								argument_template_arguments += ">";
 
-								type_name += argument_template_arguments;
+								type_name = type_name_without_templates + argument_template_arguments;
 							}
 
 							std::string generated_fields;
@@ -154,7 +155,7 @@ int main() {
 							);
 
 							if (one_introspector_per_type) {
-								const auto valid_type_name = replace_all(type_name, "::", "_");
+								const auto valid_type_name = replace_all(type_name_without_templates, "::", "_");
 								const auto filename = "introspect_" + valid_type_name + ".h";
 								const auto final_path = output_path.string() + filename;
 								
