@@ -1,7 +1,8 @@
 	template <bool C, class F%x>
-	void introspect(
-		maybe_const_ref_t<C, %x> t,
-		F f
+	void introspect_body(
+		maybe_const_ref_t<C, %x>& t,
+		F f,
+		%x
 	) {
 %x	}
 

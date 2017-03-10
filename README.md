@@ -107,14 +107,15 @@ where ```%x```  are the places where the generator will put forward declarations
 	template <bool C, class F%x>
 	void introspect(
 		maybe_const_ref_t<C, %x> t,
-		F f
+		F f,
+		%x
 	) {
 %x	}
 
 
 ```
 (my ```maybe_const_ref_t<C, T>``` is a shorthand for ```std::conditional_t<C, const T&, T&>```)
-where ```%x``` are the places where the generator will put template arguments, type name and the generated fields respectively,
+where ```%x``` are the places where the generator will put template arguments, type name, dummy pointer to type name (to aid deduction of additional template arguments) and the generated fields respectively,
 and given this field format:
 
 ```cpp
@@ -135,7 +136,8 @@ namespace augs {
 	template <bool C, class F>
 	void introspect(
 		maybe_const_ref_t<C, cosmos_metadata> t,
-		F f
+		F f,
+		const cosmos_metadata* const
 	) {
 
 		f(t.NVP(delta));
@@ -152,7 +154,8 @@ namespace augs {
 	template <bool C, class F>
 	void introspect(
 		maybe_const_ref_t<C, cosmos_significant_state> t,
-		F f
+		F f,
+		const cosmos_significant_state* const
 	) {
 		f(t.NVP(meta));
 
@@ -191,7 +194,8 @@ Example output:
 template <bool C, class F, class id_type>
 void introspect(
 	maybe_const_ref_t<C, basic_inventory_slot_id<id_type>> t,
-	F f
+	F f,
+	const basic_inventory_slot_id<id_type>* const
 ) {
 	f(t.NVP(type));
 	f(t.NVP(container_entity));

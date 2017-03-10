@@ -242,6 +242,7 @@ int main() {
 								introspector_body_format,
 								template_template_arguments,
 								type_name,
+								typesafe_sprintf("const %x* const", type_name),
 								generated_fields
 							);
 
