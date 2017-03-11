@@ -95,72 +95,65 @@ Given this output file format:
 
 ```cpp
 #pragma once
-#include "augs/templates/maybe_const.h"
-
-#define NVP(x) x, #x
 
 %xnamespace augs {
 %x}
  ```
 where ```%x```  are the places where the generator will put forward declarations and resultant introspectors respectively, and given this introspector body format:
 ```cpp
-	template <bool C, class F%x>
-	void introspect(
-		maybe_const_ref_t<C, %x> t,
+	template <class F%x, class... MemberInstances>
+	void introspect_body(
+		%x,
 		F f,
-		%x
+		MemberInstances&&... _t_
 	) {
 %x	}
 
 
 ```
-(my ```maybe_const_ref_t<C, T>``` is a shorthand for ```std::conditional_t<C, const T&, T&>```)
-where ```%x``` are the places where the generator will put template arguments, type name, dummy pointer to type name (to aid deduction of additional template arguments) and the generated fields respectively,
+where ```%x``` are the places where the generator will put template arguments for the introspected type, dummy pointer to the type name for correct overload resolution, and the generated fields respectively,
 and given this field format:
 
 ```cpp
-		f(t.NVP(%x));    
+		f("%x", _t_.%x...);
 ```
-where ```%x``` is the place where the field's name will be pasted, the program will generate this exact file to a given path:
+where ```%x``` are both the places where the field's name will be pasted, the program will generate this exact file to a given path:
 
 ```cpp
 #pragma once
-#include "augs/templates/maybe_const.h"
-
-#define NVP(x) x, #x
 
 class cosmos_metadata;
 struct cosmos_significant_state;
 
 namespace augs {
-	template <bool C, class F>
-	void introspect(
-		maybe_const_ref_t<C, cosmos_metadata> t,
+	template <class F, class... MemberInstances>
+	void introspect_body(
+		const cosmos_metadata* const,
 		F f,
-		const cosmos_metadata* const
+		MemberInstances&&... _t_
 	) {
 
-		f(t.NVP(delta));
-		f(t.NVP(total_steps_passed));
+		f("delta", _t_.delta...);
+		f("total_steps_passed", _t_.total_steps_passed...);
 
 #if COSMOS_TRACKS_GUIDS
-		f(t.NVP(next_entity_guid));
+		f("next_entity_guid", _t_.next_entity_guid...);
 #endif
-		f(t.NVP(settings));
+		f("settings", _t_.settings...);
 
-		f(t.NVP(flyweights));
+		f("flyweights", _t_.flyweights...);
 	}
 
-	template <bool C, class F>
-	void introspect(
-		maybe_const_ref_t<C, cosmos_significant_state> t,
+	template <class F, class... MemberInstances>
+	void introspect_body(
+		const cosmos_significant_state* const,
 		F f,
-		const cosmos_significant_state* const
+		MemberInstances&&... _t_
 	) {
-		f(t.NVP(meta));
+		f("meta", _t_.meta...);
 
-		f(t.NVP(pool_for_aggregates));
-		f(t.NVP(pools_for_components));
+		f("pool_for_aggregates", _t_.pool_for_aggregates...);
+		f("pools_for_components", _t_.pools_for_components...);
 	}
 }
 ```
@@ -188,17 +181,17 @@ struct basic_inventory_slot_id {
 };
 ```
 
-Example output:
+Example generated introspector:
 
 ```cpp
-template <bool C, class F, class id_type>
-void introspect(
-	maybe_const_ref_t<C, basic_inventory_slot_id<id_type>> t,
+template <class F, class id_type, class... MemberInstances>
+void introspect_body(
+	const basic_inventory_slot_id<id_type>* const,
 	F f,
-	const basic_inventory_slot_id<id_type>* const
+	MemberInstances&&... _t_
 ) {
-	f(t.NVP(type));
-	f(t.NVP(container_entity));
+	f("type", _t_.type...);
+	f("container_entity", _t_.container_entity...);
 }
 ```
 
