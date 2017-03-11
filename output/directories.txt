@@ -1,3 +1,5 @@
 P:/Projects/Hypersomnia/augs
 P:/Projects/Hypersomnia/game
 P:/Projects/Hypersomnia/application
+P:/Projects/Hypersomnia/3rdparty/Box2D/Common
+P:/Projects/Hypersomnia/3rdparty/Box2D/Dynamics

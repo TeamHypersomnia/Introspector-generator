@@ -235,14 +235,18 @@ int main() {
 									continue;
 								}
 								
-								generated_fields += typesafe_sprintf(introspector_field_format, field_name);
+								generated_fields += typesafe_sprintf(
+									introspector_field_format, 
+									field_name,
+									field_name
+								);
 							}
 
 							generated_introspectors += typesafe_sprintf(
 								introspector_body_format,
 								template_template_arguments,
-								type_name,
 								typesafe_sprintf("const %x* const", type_name),
+								//type_name,
 								generated_fields
 							);
 
