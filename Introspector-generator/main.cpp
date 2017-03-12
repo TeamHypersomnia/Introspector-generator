@@ -9,9 +9,11 @@ int main() {
 
 	const auto beginning_sequence = get_file_contents("beginning_sequence.txt");
 	const auto ending_sequence = get_file_contents("ending_sequence.txt");
+	const auto introspect_base_sequence = get_file_contents("introspect_base_sequence.txt");
 
 	const auto introspector_body_format = get_file_contents("introspector_body_format.txt");
 	const auto introspector_field_format = get_file_contents("introspector_field_format.txt");
+	const auto base_introspector_field_format = get_file_contents("base_introspector_field_format.txt");
 
 	const auto introspect_file_format_path = get_file_contents("introspect_file_format_path.txt");
 	const auto introspect_file_format = get_file_contents(introspect_file_format_path);
@@ -167,6 +169,19 @@ int main() {
 								++current_line;
 
 								const auto& new_field_line = lines[current_line];
+
+								const auto found_base_gen_begin = new_field_line.find(introspect_base_sequence);
+
+								if (found_base_gen_begin != std::string::npos) {
+									const auto base_type_name = new_field_line.substr(1 + found_base_gen_begin + introspect_base_sequence.length());
+									
+									generated_fields += typesafe_sprintf(
+										base_introspector_field_format,
+										base_type_name
+									);
+
+									continue;
+								}
 
 								if (new_field_line.find(ending_sequence) != std::string::npos) {
 									break;
