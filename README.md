@@ -8,9 +8,9 @@ Why choose this approach?
 * I don't put the introspectors inside the class definitions in order to:
 	1. not have to duplicate the code for const/non-const variations
 	2. not involve the introspection code where it is clearly not needed - that should speed up build times. The only compilation units which require introspection logic are mostly related to i/o, and they make up a tiny percentage of source files.
+	3. have all introspectors defined within a single struct named ```introspection_access``` that is easy to befriend in the event that some private members require introspection.
 
 Why not choose this approach?
-* If you have classes with mostly private members, well, RIP - it won't save you the typing required for befriending the introspectors, which can get quite annoying. Unless you do the introspection some other way where you befriend something like boost::access.
 * If you feel bad for having your computer write code for you, well, that's a reason I guess.
 
 Usage:
@@ -96,13 +96,13 @@ Given this output file format:
 ```cpp
 #pragma once
 
-%xnamespace augs {
-%x}
+%xstruct introspection_access {
+%x};
  ```
 where ```%x```  are the places where the generator will put forward declarations and resultant introspectors respectively, and given this introspector body format:
 ```cpp
 	template <class F%x, class... MemberInstances>
-	void introspect_body(
+	static void introspect_body(
 		%x,
 		F f,
 		MemberInstances&&... _t_
@@ -125,9 +125,9 @@ where ```%x``` are both the places where the field's name will be pasted, the pr
 class cosmos_metadata;
 struct cosmos_significant_state;
 
-namespace augs {
+struct introspection_access {
 	template <class F, class... MemberInstances>
-	void introspect_body(
+	static void introspect_body(
 		const cosmos_metadata* const,
 		F f,
 		MemberInstances&&... _t_
@@ -145,7 +145,7 @@ namespace augs {
 	}
 
 	template <class F, class... MemberInstances>
-	void introspect_body(
+	static void introspect_body(
 		const cosmos_significant_state* const,
 		F f,
 		MemberInstances&&... _t_
@@ -185,7 +185,7 @@ Example generated introspector:
 
 ```cpp
 template <class F, class id_type, class... MemberInstances>
-void introspect_body(
+static void introspect_body(
 	const basic_inventory_slot_id<id_type>* const,
 	F f,
 	MemberInstances&&... _t_
