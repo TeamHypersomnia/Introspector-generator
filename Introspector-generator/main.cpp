@@ -5,6 +5,25 @@
 #include "spellbook.h"
 
 int main() {
+	auto guarded_create_file = [](
+		const std::string& path, 
+		const std::string& new_contents
+	) {
+		bool should_write = true;
+
+		if(fs::exists(path)) {
+			const auto existing_contents = get_file_contents(path);
+
+			if (existing_contents == new_contents) {
+				should_write = false;
+			}
+		}
+
+		if (should_write) {
+			create_text_file(path, new_contents);
+		}
+	};
+
 	const auto dirs = get_file_lines("directories.txt");
 
 	const auto beginning_sequence = get_file_contents("beginning_sequence.txt");
@@ -272,7 +291,7 @@ int main() {
 								
 								generated_files_for_inclusion.push_back(filename);
 
-								create_text_file(
+								guarded_create_file(
 									final_path,
 									typesafe_sprintf(
 										introspect_file_format, 
@@ -294,19 +313,19 @@ int main() {
 	}
 
 	if (one_introspector_per_type) {
-		std::string include_all_file_contents;
+		std::string contents_of_include_all_file;
 
 		for (const auto& l : generated_files_for_inclusion) {
-			include_all_file_contents += typesafe_sprintf("#include \"%x\"\n", l);
+			contents_of_include_all_file += typesafe_sprintf("#include \"%x\"\n", l);
 		}
 
-		create_text_file(
+		guarded_create_file(
 			output_path.string() + "include_all_introspectors.h",
-			include_all_file_contents
+			contents_of_include_all_file
 		);
 	}
 	else {
-		create_text_file(
+		guarded_create_file(
 			output_path.string(),
 			typesafe_sprintf(
 				introspect_file_format, 
