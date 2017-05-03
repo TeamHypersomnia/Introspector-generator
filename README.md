@@ -1,10 +1,13 @@
 # Introspector-generator
 Small utility that generates introspector functions into a separate file, from comments in the code.
 
+It is currently used to generate type information for my open-source shooter [Hypersomnia][3].
+
 Why choose this approach?
 
 * You don't have to use macro hacks like ```(int) field, (double) other``` so when you suddenly realize that you don't need introspection in your code, you are left  with a handful of comments instead of some crazy syntax. Don't even get me started about the abominations that you need to include every time in order to even get it working.
 * The aforementioned macros require boost, don't they? So that's one dependency less.
+* Build based on CMake lets you easily incorporate this utility as a pre-build event for your codebase.
 * I don't put the introspectors inside the class definitions in order to:
 	1. not have to duplicate the code for const/non-const variations
 	2. not involve the introspection code where it is clearly not needed - that should speed up build times. The only compilation units which require introspection logic are mostly related to i/o, and they make up a tiny percentage of source files.
@@ -13,16 +16,32 @@ Why choose this approach?
 Why not choose this approach?
 * If you feel bad for having your computer write code for you, well, that's a reason I guess.
 
-Usage:
+# How to build
+To build, you will need CMake. Create a ```build/``` folder next to ```CMakeLists.txt``` file. 
+Then, use your favorite shell to go into the newly created ```build/``` folder and run:
+
+```
+cmake ..
+```
+
+If you are on Windows, resultant ```.sln``` and ```.vcxproj``` files should appear in the ```build/``` directory.
+Open ```IntrospectorGenerator.sln``` file, select **Release** configuration and hit **F7** to build.
+
+# Usage
+
+The program takes a single command line argument, and that is the path to your input configuration file.
+To see an example of a correct configuration file, open ```examples/input.cfg```.
+
+# Example usage in your code:
 
 1. Paste ``` // GEN INTROSPECTOR [struct|class] [type|namespace::type] [template arg1] [template arg name1] [template arg2] [template arg name2] ...``` before the introspected members.
 2. Paste ``` // END GEN INTROSPECTOR``` after all the introspected members.
 
-Keywords for the starting and finishing comments may be modified in ```beginning_sequence.txt``` and ```ending_sequence.txt```.
+Keywords for the starting and finishing comments can be configured, as seen in ```examples/input.cfg```.
 
 The algorithm will output a message in the console when there is a problem with processing due to bad syntax or something else.
 
-What the algorithm preserves:
+What the algorithm allows between ```// GEN INTROSPECTOR``` and ```// END GEN INTROSPECTOR```:
 * Members of exactly this format:
 ```cpp
 type_name member1;
@@ -39,7 +58,7 @@ What the algorithm skips:
 * Lines with typedef declarations.
 * Lines with public/private/protected specifiers.
 
-What **cannot** be found between the // GEN and // END GEN comments:
+What **cannot** be found between ```// GEN INTROSPECTOR``` and ```// END GEN INTROSPECTOR```:
 
 * Members that occupy more than one line, multiple members per line and members separated by a comma. In particular, these:
 ```cpp
@@ -209,3 +228,5 @@ Namespaces are respected before type names like that:
 // GEN INTROSPECTOR struct augs::image
 ```
 They will also be correctly forward-declared, albeit only with one level of depth. Moreover, the algorithm does not recognize if an alleged namespace is actually a nested class, so this won't work with these.  
+
+  [3]: https://github.com/TeamHypersomnia/Hypersomnia
