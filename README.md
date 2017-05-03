@@ -25,7 +25,7 @@ cmake ..
 ```
 
 If you are on Windows, resultant ```.sln``` and ```.vcxproj``` files should appear in the ```build/``` directory.
-Open ```IntrospectorGenerator.sln``` file, select **Release** configuration and hit **F7** to build.
+Open ```Introspector-generator.sln``` file, select **Release** configuration and hit **F7** to build.
 
 # Usage
 
