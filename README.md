@@ -8,7 +8,7 @@ Why choose this approach?
 * You don't have to use macro hacks like ```(int) field, (double) other``` so when you suddenly realize that you don't need introspection in your code, you are left  with a handful of comments instead of some crazy syntax. Don't even get me started about the abominations that you need to include every time in order to even get it working.
 * The aforementioned macros require boost, don't they? So that's one dependency less.
 * Build based on CMake lets you easily incorporate this utility as a pre-build event for your codebase.
-* I don't put the introspectors inside the class definitions in order to:
+* I put all the generated introspectors inside a single struct, instead of putting them inside of introspected classes, in order to:
 	1. not have to duplicate the code for const/non-const variations
 	2. not involve the introspection code where it is clearly not needed - that should speed up build times. The only compilation units which require introspection logic are mostly related to i/o, and they make up a tiny percentage of source files.
 	3. have all introspectors defined within a single struct named ```introspection_access``` that is easy to befriend in the event that some private members require introspection.
