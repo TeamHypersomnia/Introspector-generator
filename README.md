@@ -45,7 +45,8 @@ What the algorithm allows between ```// GEN INTROSPECTOR``` and ```// END GEN IN
 * Members of exactly this format:
 ```cpp
 type_name member1;
-type_name member2 = some_initializator();
+type_name member2 = some_value;
+type_name member3 = some_type(some_arguments...);
 ```
 In particular, there must be only one space before the = sign.
 * Macros (the first character of the line must be #).
