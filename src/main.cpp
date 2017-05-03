@@ -13,17 +13,7 @@ int main(int argc, char** argv) {
 		const std::string& path, 
 		const std::string& new_contents
 	) {
-		bool should_write = true;
-
-		if(fs::exists(path)) {
-			const auto existing_contents = get_file_contents(path);
-
-			if (existing_contents == new_contents) {
-				should_write = false;
-			}
-		}
-
-		if (should_write) {
+		if (!fs::exists(path) || get_file_contents(path) != new_contents) {
 			create_text_file(path, new_contents);
 		}
 	};

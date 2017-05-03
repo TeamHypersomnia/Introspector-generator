@@ -1,15 +1,11 @@
 #pragma once
-#include <string>
 #include <sstream>
-#include <utility>
-#include <type_traits>
 #include <limits>
 #include <fstream>
-#include <cassert>
 #include <experimental\filesystem>
 
 template<class Str, class Repl>
-Str replace_all(Str str, Repl _from, Repl _to) {
+auto replace_all(Str str, Repl _from, Repl _to) {
 	const Str& from(_from);
 	const Str& to(_to);
 
@@ -55,20 +51,20 @@ void typesafe_sprintf_detail(size_t starting_pos, std::basic_string<CharType>& t
 }
 
 template<typename CharType, typename... A>
-std::basic_string<CharType> typesafe_sprintf(std::basic_string<CharType> f, A&&... a) {
+auto typesafe_sprintf(std::basic_string<CharType> f, A&&... a) {
 	typesafe_sprintf_detail(0, f, std::forward<A>(a)...);
 	return f;
 }
 
 template<typename... A>
-std::string typesafe_sprintf(const char* const c_str, A&&... a) {
+auto typesafe_sprintf(const char* const c_str, A&&... a) {
 	auto f = std::string(c_str);
 	typesafe_sprintf_detail(0, f, std::forward<A>(a)...);
 	return f;
 }
 
 template<typename... A>
-std::wstring typesafe_sprintf(const wchar_t* const c_str, A&&... a) {
+auto typesafe_sprintf(const wchar_t* const c_str, A&&... a) {
 	auto f = std::wstring(c_str);
 	typesafe_sprintf_detail(0, f, std::forward<A>(a)...);
 	return f;
@@ -76,7 +72,7 @@ std::wstring typesafe_sprintf(const wchar_t* const c_str, A&&... a) {
 
 namespace fs = std::experimental::filesystem;
 
-std::vector<std::string> get_file_lines(const std::string& filename) {
+auto get_file_lines(const std::string& filename) {
 	std::ifstream input(filename);
 
 	std::vector<std::string> out;
@@ -85,29 +81,7 @@ std::vector<std::string> get_file_lines(const std::string& filename) {
 		out.emplace_back(line);
 	}
 
-	return std::move(out);
-}
-
-std::vector<std::string> get_file_lines_without_blanks_and_comments(
-	const std::string& filename,
-	const char comment_begin_character = '%'
-) {
-	std::ifstream input(filename);
-
-	std::vector<std::string> out;
-
-	for (std::string line; std::getline(input, line); ) {
-		const bool should_omit = 
-			std::all_of(line.begin(), line.end(), isspace) 
-			|| line[0] == comment_begin_character
-		;
-
-		if(!should_omit) {
-			out.emplace_back(line);
-		}
-	}
-
-	return std::move(out);
+	return out;
 }
 
 void debugbreak() {
