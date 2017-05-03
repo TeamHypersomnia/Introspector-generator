@@ -1,5 +1,0 @@
-P:/Projects/Hypersomnia/src/augs
-P:/Projects/Hypersomnia/src/game
-P:/Projects/Hypersomnia/src/application
-P:/Projects/Hypersomnia/src/3rdparty/Box2D/Common
-P:/Projects/Hypersomnia/src/3rdparty/Box2D/Dynamics

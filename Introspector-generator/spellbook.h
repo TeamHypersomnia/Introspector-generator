@@ -88,36 +88,135 @@ std::vector<std::string> get_file_lines(const std::string& filename) {
 	return std::move(out);
 }
 
+std::vector<std::string> get_file_lines_without_blanks_and_comments(
+	const std::string& filename,
+	const char comment_begin_character = '%'
+) {
+	std::ifstream input(filename);
+
+	std::vector<std::string> out;
+
+	for (std::string line; std::getline(input, line); ) {
+		const bool should_omit = 
+			std::all_of(line.begin(), line.end(), isspace) 
+			|| line[0] == comment_begin_character
+		;
+
+		if(!should_omit) {
+			out.emplace_back(line);
+		}
+	}
+
+	return std::move(out);
+}
+
 void debugbreak() {
 	std::getchar();
 	exit(0);
 }
 
-template <class T>
-void assign_file_contents(const std::string& filename, T& target) {
-	if (!fs::exists(filename)) {
-		std::cout << typesafe_sprintf("File %x does not exist!", filename);
+std::string get_file_contents(std::string path) {
+	if (!fs::exists(path)) {
+		std::cout << typesafe_sprintf("File %x does not exist!", path);
 		debugbreak();
 	}
 
-	std::ifstream t(filename);
+	std::ifstream t(path);
+	std::stringstream buffer;
+	buffer << t.rdbuf();
 
-	t.seekg(0, std::ios::end);
-	target.reserve(static_cast<unsigned>(t.tellg()));
-	t.seekg(0, std::ios::beg);
-
-	target.assign((std::istreambuf_iterator<char>(t)),
-		std::istreambuf_iterator<char>());
-}
-
-std::string get_file_contents(std::string filename) {
-	std::string result;
-	assign_file_contents(filename, result);
-	return result;
+	return buffer.str();
 }
 
 template <class T>
 void create_text_file(const T& filename, const T& text) {
 	std::ofstream out(filename, std::ios::out);
 	out << text;
+}
+
+auto make_get_line_until(
+	const std::vector<std::string>& lines,
+	size_t& current_line
+) {
+	return [&lines, &current_line](const std::string delimiter = std::string()) {
+		if (!(current_line < lines.size())) {
+			return false;
+		}
+		
+		if ((!delimiter.empty() && lines[current_line] == delimiter)) {
+			++current_line;
+			return false;
+		}
+		
+		return true;
+	};
+}
+
+template <typename... A>
+void LOG(const std::string& f, A&&... a) {
+	LOG(typesafe_sprintf(f, std::forward<A>(a)...));
+}
+
+template <>
+void LOG(const std::string& f) {
+
+}
+
+#define ensure(x) if(!(x))\
+{\
+    LOG( "ensure(%x) failed\nfile: %x\nline: %x", #x, __FILE__, __LINE__ );\
+	std::getchar(); \
+}
+
+auto lines_to_string(
+	const std::vector<std::string>& lines
+) {
+	std::string output;
+
+	for(const auto& l : lines) {
+		output += l + '\n';
+	}
+
+	return output;
+}
+
+auto break_lines_by_properties(
+	const std::vector<std::string>& lines,
+	const std::vector<std::string>& properties
+) {
+	std::vector<std::vector<std::string>> lines_per_property;
+
+	if (properties.size() > 0 && lines.size() > 0) {
+		std::size_t i = 0;
+		std::size_t p = 0;
+
+		auto get_line_until = make_get_line_until(lines, i);
+
+		const bool first_property_name_matches = lines[i++] == properties[p++];
+		ensure(first_property_name_matches);
+
+		for (; p < properties.size(); ++p) {
+			std::vector<std::string> new_property_content;
+
+			while (get_line_until(properties[p])) {
+				new_property_content.push_back(lines[i++]);
+			}
+
+			lines_per_property.push_back(new_property_content);
+		}
+
+		{
+			std::vector<std::string> new_property_content;
+
+			while(get_line_until()) {
+				new_property_content.push_back(lines[i++]);
+			}
+
+			lines_per_property.push_back(new_property_content);
+		}
+
+		ensure(lines_per_property.size() == properties.size());
+	}
+
+	return lines_per_property;
 }

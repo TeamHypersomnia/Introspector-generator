@@ -1,8 +1,0 @@
-		template <class F%x, class... Instances>
-		static void introspect_body(
-			%x,
-			F f,
-			Instances&&... _t_
-		) {
-%x		}
-

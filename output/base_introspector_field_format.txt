@@ -1,1 +1,0 @@
-		introspect_body(static_cast<%x*>(nullptr), f, std::forward<Instances>(_t_)...);

@@ -24,27 +24,48 @@ int main() {
 		}
 	};
 
-	const auto dirs = get_file_lines("directories.txt");
+	std::string beginning_line;
+	std::string ending_line;
+	std::string introspect_base_line;
+	std::vector<std::string> header_directories;
+	std::string generated_file_path;
+	std::string introspector_field_format;
+	std::string base_introspector_field_format;
+	std::string introspector_body_format;
+	std::string generated_file_format;
 
-	const auto beginning_sequence = get_file_contents("beginning_sequence.txt");
-	const auto ending_sequence = get_file_contents("ending_sequence.txt");
-	const auto introspect_base_sequence = get_file_contents("introspect_base_sequence.txt");
+	{
+		const auto cfg = get_file_lines("input.cfg");
+		ensure(cfg.size() > 0);
 
-	const auto introspector_body_format = get_file_contents("introspector_body_format.txt");
-	const auto introspector_field_format = get_file_contents("introspector_field_format.txt");
-	const auto base_introspector_field_format = get_file_contents("base_introspector_field_format.txt");
+		const auto lines_per_prop = break_lines_by_properties(
+			cfg,
+			{
+				"beginning-line:",
+				"ending-line:",
+				"introspect-base-line:",
+				"header-directories:",
+				"generated-file-path:",
+				"introspector-field-format:",
+				"base-introspector-field-format:",
+				"introspector-body-format:",
+				"generated-file-format:"
+			}
+		);
 
-	const auto introspect_file_format_path = get_file_contents("introspect_file_format_path.txt");
-	const auto introspect_file_format = get_file_contents(introspect_file_format_path);
-	
-	const auto output_path = fs::path(get_file_contents("output_path.txt"));
+		std::size_t i = 0u;
 
-	bool one_introspector_per_type = false;
-
-	if (output_path.filename() == ".") {
-		fs::create_directories(output_path);
-		one_introspector_per_type = true;
+		beginning_line = lines_per_prop[i++][0];
+		ending_line = lines_per_prop[i++][0];
+		introspect_base_line = lines_per_prop[i++][0];
+		header_directories = lines_per_prop[i++];
+		generated_file_path = lines_per_prop[i++][0];
+		introspector_field_format = lines_to_string(lines_per_prop[i++]);
+		base_introspector_field_format = lines_to_string(lines_per_prop[i++]);
+		introspector_body_format = lines_to_string(lines_per_prop[i++]);
+		generated_file_format = lines_to_string(lines_per_prop[i++]);
 	}
+	
 
 	std::vector<std::string> generated_files_for_inclusion;
 
@@ -67,7 +88,7 @@ int main() {
 		return all;
 	};
 
-	for (const auto dirpath : dirs) {
+	for (const auto dirpath : header_directories) {
 		for (fs::recursive_directory_iterator i(dirpath), end; i != end; ++i) {
 			if (!is_directory(i->path())) {
 				const auto path = i->path();
@@ -93,10 +114,10 @@ int main() {
 					};
 
 					while (current_line < lines.size()) {
-						const auto found_gen_begin = lines[current_line].find(beginning_sequence);
+						const auto found_gen_begin = lines[current_line].find(beginning_line);
 
 						if (found_gen_begin != std::string::npos) {
-							const auto after_gen = lines[current_line].substr(found_gen_begin + beginning_sequence.length());
+							const auto after_gen = lines[current_line].substr(found_gen_begin + beginning_line.length());
 							std::istringstream in(after_gen);
 
 							std::string struct_or_class;
@@ -189,10 +210,10 @@ int main() {
 
 								const auto& new_field_line = lines[current_line];
 
-								const auto found_base_gen_begin = new_field_line.find(introspect_base_sequence);
+								const auto found_base_gen_begin = new_field_line.find(introspect_base_line);
 
 								if (found_base_gen_begin != std::string::npos) {
-									const auto base_type_name = new_field_line.substr(1 + found_base_gen_begin + introspect_base_sequence.length());
+									const auto base_type_name = new_field_line.substr(1 + found_base_gen_begin + introspect_base_line.length());
 									
 									generated_fields += typesafe_sprintf(
 										base_introspector_field_format,
@@ -202,7 +223,7 @@ int main() {
 									continue;
 								}
 
-								if (new_field_line.find(ending_sequence) != std::string::npos) {
+								if (new_field_line.find(ending_line) != std::string::npos) {
 									break;
 								}
 								
@@ -283,26 +304,6 @@ int main() {
 								//type_name,
 								generated_fields
 							);
-
-							if (one_introspector_per_type) {
-								const auto valid_type_name = replace_all(type_name_without_templates, "::", "_");
-								const auto filename = "introspect_" + valid_type_name + ".h";
-								const auto final_path = output_path.string() + filename;
-								
-								generated_files_for_inclusion.push_back(filename);
-
-								guarded_create_file(
-									final_path,
-									typesafe_sprintf(
-										introspect_file_format, 
-										make_namespaces(),
-										generated_introspectors
-									)
-								);
-
-								namespaces.clear();
-								generated_introspectors.clear();
-							}
 						}
 
 						++current_line;
@@ -312,26 +313,12 @@ int main() {
 		}
 	}
 
-	if (one_introspector_per_type) {
-		std::string contents_of_include_all_file;
-
-		for (const auto& l : generated_files_for_inclusion) {
-			contents_of_include_all_file += typesafe_sprintf("#include \"%x\"\n", l);
-		}
-
-		guarded_create_file(
-			output_path.string() + "include_all_introspectors.h",
-			contents_of_include_all_file
-		);
-	}
-	else {
-		guarded_create_file(
-			output_path.string(),
-			typesafe_sprintf(
-				introspect_file_format, 
-				make_namespaces(),
-				generated_introspectors
-			)
-		);
-	}
+	guarded_create_file(
+		generated_file_path,
+		typesafe_sprintf(
+			generated_file_format, 
+			make_namespaces(),
+			generated_introspectors
+		)
+	);
 }
