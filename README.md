@@ -14,7 +14,10 @@ Why choose this approach?
 	3. have all introspectors defined within a single struct named ```introspection_access``` that is easy to befriend in the event that some private members require introspection.
 
 Why not choose this approach?
-* If you feel bad for having your computer write code for you, well, that's a reason I guess.
+* If your member fields do not follow the syntax requirements listed later on, and you would have to rewrite them, that is a very good reason.
+* Nested classes are not supported. That is because nested classes cannot be forward declared. If you can't afford to extract these classes, that is a good reason not to use this generator.
+* Classes with more than one level of namespace depth are not supported. For example, ```a::my_class``` is fine, but ```a::b::my_class``` is not supported. That is because I am lazy. If you cannot afford to extract these classes, that is a good reason not to use this generator.
+* If you feel bad for having your computer write code for you, well, that is also a reason, I guess.
 
 # How to build
 To build, you will need CMake. Create a ```build/``` folder next to ```CMakeLists.txt``` file. 
