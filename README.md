@@ -32,7 +32,7 @@ Open ```Introspector-generator.sln``` file, select **Release** configuration and
 The program takes a single command line argument, and that is the path to your input configuration file.
 To see an example of a correct configuration file, open ```examples/input.cfg```.
 
-# Example usage in your code:
+# Usage in your code
 
 1. Paste ``` // GEN INTROSPECTOR [struct|class] [type|namespace::type] [template arg1] [template arg name1] [template arg2] [template arg name2] ...``` before the introspected members.
 2. Paste ``` // END GEN INTROSPECTOR``` after all the introspected members.
