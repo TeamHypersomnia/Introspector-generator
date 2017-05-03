@@ -4,7 +4,11 @@
 
 #include "spellbook.h"
 
-int main() {
+int main(int argc, char** argv) {
+	ensure(argc >= 2 && "usage: configuration_file_input_path");
+
+	const std::string configuration_file_input_path = argv[1];
+
 	auto guarded_create_file = [](
 		const std::string& path, 
 		const std::string& new_contents
@@ -36,7 +40,7 @@ int main() {
 	std::string generated_file_format;
 
 	{
-		const auto cfg = get_file_lines("input.cfg");
+		const auto cfg = get_file_lines(configuration_file_input_path);
 		ensure(cfg.size() > 0);
 
 		const auto lines_per_prop = break_lines_by_properties(

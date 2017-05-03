@@ -159,7 +159,7 @@ void LOG(const std::string& f, A&&... a) {
 
 template <>
 void LOG(const std::string& f) {
-
+	std::cout << f;
 }
 
 #define ensure(x) if(!(x))\
