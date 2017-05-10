@@ -104,15 +104,16 @@ int main(int argc, char** argv) {
 
 		const auto errcheck = [&](const bool flag) {
 			if (!flag) {
-				std::cout <<
-					typesafe_sprintf(
-						"A problem in line %x in file %x:\n%x\n",
-						current_line,
-						path,
-						lines[current_line]
-					)
-				;
+				const auto error_contents = typesafe_sprintf(
+					"A problem in line %x in file %x:\n%x\n",
+					current_line,
+					path,
+					lines[current_line]
+				);
 
+				create_text_file(generated_file_path, "#error " + error_contents);
+
+				std::cout << error_contents;
 				std::getchar();
 			}
 		};
