@@ -263,31 +263,35 @@ int main(int argc, char** argv) {
 						continue;
 					}
 
-					const auto found_eq = new_field_line.find("=");
 					std::string field_name;
+					std::string field_type;
+
+					std::size_t field_name_beginning = std::string::npos;
+					std::size_t field_name_ending = std::string::npos;
+					
+					const auto found_eq = new_field_line.find("=");
 
 					if (found_eq != std::string::npos) {
-						const auto found_s = new_field_line.find(" =");
-
-						errcheck(found_s != std::string::npos);
-
-						const auto field_name_beginning = new_field_line.rfind(" ", found_s - 1) + 1;
-
-						field_name = new_field_line.substr(
-							field_name_beginning, found_s - field_name_beginning
-						);
+						field_name_ending = new_field_line.find(" =");
+						errcheck(field_name_ending != std::string::npos);
+						field_name_beginning = new_field_line.rfind(" ", field_name_ending - 1) + 1;
 					}
 					else {
-						const auto found_s = new_field_line.find(";");
-
-						errcheck(found_s != std::string::npos);
-
-						const auto field_name_beginning = new_field_line.rfind(" ", found_s) + 1;
-
-						field_name = new_field_line.substr(
-							field_name_beginning, found_s- field_name_beginning
-						);
+						field_name_ending = new_field_line.find(";");
+						errcheck(field_name_ending != std::string::npos);
+						field_name_beginning = new_field_line.rfind(" ", field_name_ending) + 1;
 					}
+					
+					field_name = new_field_line.substr(
+						field_name_beginning, field_name_ending - field_name_beginning
+					);
+
+					const auto field_type_beginning = new_field_line.find_first_not_of(" \t\r");
+
+					field_type = new_field_line.substr(
+						field_type_beginning,
+						field_name_beginning - field_type_beginning - 1 // peel off the trailing space
+					);
 
 					errcheck(field_name.find_first_of("[]") == std::string::npos);
 
@@ -296,9 +300,9 @@ int main(int argc, char** argv) {
 					}
 					
 					generated_fields += typesafe_sprintf(
-						introspector_field_format, 
+						introspector_field_format,
 						field_name,
-						field_name
+						field_type
 					);
 				}
 
