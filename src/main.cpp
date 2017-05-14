@@ -295,10 +295,6 @@ int main(int argc, char** argv) {
 
 					errcheck(field_name.find_first_of("[]") == std::string::npos);
 
-					if (field_name == "pad") {
-						continue;
-					}
-					
 					generated_fields += typesafe_sprintf(
 						introspector_field_format,
 						field_name,

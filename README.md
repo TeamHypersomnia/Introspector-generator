@@ -56,7 +56,6 @@ In particular, there must be only one space before the = sign.
 * Lines with only whitespaces.
 
 What the algorithm skips:
-* Fields named ```pad``` (for my internal usage).
 * Lines with friend declarations.
 * Lines with using declarations.
 * Lines with typedef declarations.
