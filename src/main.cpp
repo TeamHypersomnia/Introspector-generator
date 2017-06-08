@@ -135,10 +135,12 @@ int main(int argc, char** argv) {
 				std::string struct_or_class_or_enum;
 				in >> struct_or_class_or_enum;
 
-				const bool is_enum = struct_or_class_or_enum == "enum"; 
-				
+				const bool is_enum =
+					struct_or_class_or_enum == "enum"
+					;
+
 				errcheck(
-					struct_or_class_or_enum == "struct" 
+					struct_or_class_or_enum == "struct"
 					|| struct_or_class_or_enum == "class"
 					|| is_enum
 				);
@@ -147,9 +149,20 @@ int main(int argc, char** argv) {
 
 				std::string argument_template_arguments;
 				std::string template_template_arguments;
-				
+
 				std::string type_name_without_templates;
-				in >> type_name_without_templates;
+				
+				if (is_enum) {
+					in >> type_name_without_templates;
+
+					if (type_name_without_templates == "class") {
+						struct_or_class_or_enum = "enum class";
+						in >> type_name_without_templates;
+					}
+				}
+				else {
+					in >> type_name_without_templates;
+				}
 
 				type_name = type_name_without_templates;
 
@@ -193,36 +206,32 @@ int main(int argc, char** argv) {
 					type_without_namespace = name.substr(found_colons + 2);
 				}
 
-				// don't forward declare an enum
+				std::vector<std::string> forward_declaration_lines;
 
-				if (!is_enum) {
-					std::vector<std::string> forward_declaration_lines;
-
-					if (template_arguments.size()) {
-						forward_declaration_lines.push_back(
-							typesafe_sprintf("template %x\n", "<" + template_template_arguments.substr(2) + ">")
-						);
-					}
-					
+				if (template_arguments.size()) {
 					forward_declaration_lines.push_back(
-						typesafe_sprintf(
-							"%x %x;\n",
-							struct_or_class_or_enum,
-							type_without_namespace
-						)
+						typesafe_sprintf("template %x\n", "<" + template_template_arguments.substr(2) + ">")
 					);
+				}
+				
+				forward_declaration_lines.push_back(
+					typesafe_sprintf(
+						"%x %x;\n",
+						struct_or_class_or_enum,
+						type_without_namespace
+					)
+				);
 
-					const bool should_add_tabulation = namespace_of_type != "<unnamed>";
+				const bool should_add_tabulation = namespace_of_type != "<unnamed>";
 
-					if (should_add_tabulation) {
-						for (auto& l : forward_declaration_lines) {
-							l = "	" + l;
-						}
+				if (should_add_tabulation) {
+					for (auto& l : forward_declaration_lines) {
+						l = "	" + l;
 					}
+				}
 
-					for (const auto& l : forward_declaration_lines) {
-						namespaces[namespace_of_type] += l;
-					}
+				for (const auto& l : forward_declaration_lines) {
+					namespaces[namespace_of_type] += l;
 				}
 
 				std::string generated_fields;

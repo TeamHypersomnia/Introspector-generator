@@ -1,7 +1,7 @@
 #pragma once
 
 enum class EN1 {
-	// GEN INTROSPECTOR enum EN1
+	// GEN INTROSPECTOR enum class EN1
 	A = 576 + 1,
 	B,
 	C = 42
@@ -18,7 +18,7 @@ enum EN2 {
 
 namespace myn {
 	enum class EN3 {
-		// GEN INTROSPECTOR enum myn::EN3
+		// GEN INTROSPECTOR enum class myn::EN3
 		asdad = 1,
 		fdsfsfds,
 		EfsdfdsfsF

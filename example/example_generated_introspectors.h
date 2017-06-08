@@ -2,6 +2,8 @@
 #define FIELD(x) f(#x, _t_.x...)
 
 // Forward declarations
+enum class EN1;
+enum EN2;
 struct c;
 class a;
 template <class id_type>
@@ -9,8 +11,13 @@ struct base;
 template <class id_type>
 struct derived;
 
+namespace myn {
+	enum class EN3;
+}
+
 namespace augs {
-	const char* enum_to_string(const EN1 e) {
+	template <class... T>
+	const char* enum_to_string(const EN1 e, T...) {
 		switch(e) {
 		case EN1::A: return "A";
 		case EN1::B: return "B";
@@ -19,7 +26,8 @@ namespace augs {
 		}
 	}
 
-	const char* enum_to_string(const EN2 e) {
+	template <class... T>
+	const char* enum_to_string(const EN2 e, T...) {
 		switch(e) {
 		case EN2::DASD: return "DASD";
 		case EN2::f34879078: return "f34879078";
@@ -28,7 +36,8 @@ namespace augs {
 		}
 	}
 
-	const char* enum_to_string(const myn::EN3 e) {
+	template <class... T>
+	const char* enum_to_string(const myn::EN3 e, T...) {
 		switch(e) {
 		case myn::EN3::asdad: return "asdad";
 		case myn::EN3::fdsfsfds: return "fdsfsfds";
