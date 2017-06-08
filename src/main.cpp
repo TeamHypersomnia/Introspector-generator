@@ -27,6 +27,8 @@ int main(int argc, char** argv) {
 	std::string introspector_field_format;
 	std::string base_introspector_field_format;
 	std::string introspector_body_format;
+	std::string enum_field_format;
+	std::string enum_introspector_body_format;
 	std::string generated_file_format;
 
 	{
@@ -45,6 +47,8 @@ int main(int argc, char** argv) {
 				"introspector-field-format:",
 				"base-introspector-field-format:",
 				"introspector-body-format:",
+				"enum-field-format:",
+				"enum-introspector-body-format:",
 				"generated-file-format:"
 			}
 		);
@@ -60,6 +64,8 @@ int main(int argc, char** argv) {
 		introspector_field_format = lines_to_string(lines_per_prop[i++]);
 		base_introspector_field_format = lines_to_string(lines_per_prop[i++]);
 		introspector_body_format = lines_to_string(lines_per_prop[i++]);
+		enum_field_format = lines_to_string(lines_per_prop[i++]);
+		enum_introspector_body_format = lines_to_string(lines_per_prop[i++]);
 		generated_file_format = lines_to_string(lines_per_prop[i++]);
 	}
 	
@@ -67,6 +73,7 @@ int main(int argc, char** argv) {
 	std::vector<std::string> generated_files_for_inclusion;
 
 	std::string generated_introspectors;
+	std::string generated_enums;
 
 	std::map<std::string, std::string> namespaces;
 
@@ -125,10 +132,16 @@ int main(int argc, char** argv) {
 				const auto after_gen = lines[current_line].substr(found_gen_begin + beginning_line.length());
 				std::istringstream in(after_gen);
 
-				std::string struct_or_class;
-				in >> struct_or_class;
+				std::string struct_or_class_or_enum;
+				in >> struct_or_class_or_enum;
 
-				errcheck(struct_or_class == "struct" || struct_or_class == "class");
+				const bool is_enum = struct_or_class_or_enum == "enum"; 
+				
+				errcheck(
+					struct_or_class_or_enum == "struct" 
+					|| struct_or_class_or_enum == "class"
+					|| is_enum
+				);
 
 				std::string type_name;
 
@@ -180,32 +193,36 @@ int main(int argc, char** argv) {
 					type_without_namespace = name.substr(found_colons + 2);
 				}
 
-				std::vector<std::string> forward_declaration_lines;
+				// don't forward declare an enum
 
-				if (template_arguments.size()) {
-					forward_declaration_lines.push_back(
-						typesafe_sprintf("template %x\n", "<" + template_template_arguments.substr(2) + ">")
-					);
-				}
-				
-				forward_declaration_lines.push_back(
-					typesafe_sprintf(
-						"%x %x;\n",
-						struct_or_class,
-						type_without_namespace
-					)
-				);
+				if (!is_enum) {
+					std::vector<std::string> forward_declaration_lines;
 
-				const bool should_add_tabulation = namespace_of_type != "<unnamed>";
-
-				if (should_add_tabulation) {
-					for (auto& l : forward_declaration_lines) {
-						l = "	" + l;
+					if (template_arguments.size()) {
+						forward_declaration_lines.push_back(
+							typesafe_sprintf("template %x\n", "<" + template_template_arguments.substr(2) + ">")
+						);
 					}
-				}
+					
+					forward_declaration_lines.push_back(
+						typesafe_sprintf(
+							"%x %x;\n",
+							struct_or_class_or_enum,
+							type_without_namespace
+						)
+					);
 
-				for (const auto& l : forward_declaration_lines) {
-					namespaces[namespace_of_type] += l;
+					const bool should_add_tabulation = namespace_of_type != "<unnamed>";
+
+					if (should_add_tabulation) {
+						for (auto& l : forward_declaration_lines) {
+							l = "	" + l;
+						}
+					}
+
+					for (const auto& l : forward_declaration_lines) {
+						namespaces[namespace_of_type] += l;
+					}
 				}
 
 				std::string generated_fields;
@@ -214,19 +231,6 @@ int main(int argc, char** argv) {
 					++current_line;
 
 					const auto& new_field_line = lines[current_line];
-
-					const auto found_base_gen_begin = new_field_line.find(introspect_base_line);
-
-					if (found_base_gen_begin != std::string::npos) {
-						const auto base_type_name = new_field_line.substr(1 + found_base_gen_begin + introspect_base_line.length());
-						
-						generated_fields += typesafe_sprintf(
-							base_introspector_field_format,
-							base_type_name
-						);
-
-						continue;
-					}
 
 					if (new_field_line.find(ending_line) != std::string::npos) {
 						break;
@@ -237,78 +241,121 @@ int main(int argc, char** argv) {
 						continue;
 					}
 
-					static const std::string skip_keywords[] = {
-						"private:",
-						"protected:",
-						"public:",
-						"friend ",
-						"using ",
-						"typedef "
-					};
-
-					bool should_skip = false;
-
-					for (const auto& k : skip_keywords) {
-						if (new_field_line.find(k) != std::string::npos) {
-							should_skip = true;
-						}
-					}
-
-					if (should_skip) {
-						continue;
-					}
-
 					if (std::all_of(new_field_line.begin(), new_field_line.end(), isspace)) {
 						generated_fields += new_field_line + "\n";
 						continue;
 					}
 
-					std::string field_name;
-					std::string field_type;
+					if (is_enum) {
+						const auto field_name_beginning = new_field_line.find_first_not_of(" \t\r");
+						errcheck(field_name_beginning != std::string::npos);
 
-					std::size_t field_name_beginning = std::string::npos;
-					std::size_t field_name_ending = std::string::npos;
-					
-					const auto found_eq = new_field_line.find("=");
+						auto field_name_ending = new_field_line.find_first_of("=, \t\r", field_name_beginning);
 
-					if (found_eq != std::string::npos) {
-						field_name_ending = new_field_line.find(" =");
-						errcheck(field_name_ending != std::string::npos);
-						field_name_beginning = new_field_line.rfind(" ", field_name_ending - 1) + 1;
+						if (field_name_ending == std::string::npos) {
+							field_name_ending = new_field_line.size();
+						}
+
+						const auto field_name = new_field_line.substr(field_name_beginning, field_name_ending - field_name_beginning);
+
+						generated_fields += typesafe_sprintf(
+							enum_field_format,
+							type_name,
+							field_name,
+							field_name
+						);
 					}
 					else {
-						field_name_ending = new_field_line.find(";");
-						errcheck(field_name_ending != std::string::npos);
-						field_name_beginning = new_field_line.rfind(" ", field_name_ending) + 1;
+						const auto found_base_gen_begin = new_field_line.find(introspect_base_line);
+
+						if (found_base_gen_begin != std::string::npos) {
+							const auto base_type_name = new_field_line.substr(1 + found_base_gen_begin + introspect_base_line.length());
+
+							generated_fields += typesafe_sprintf(
+								base_introspector_field_format,
+								base_type_name
+							);
+
+							continue;
+						}
+
+						static const std::string skip_keywords[] = {
+							"private:",
+							"protected:",
+							"public:",
+							"friend ",
+							"using ",
+							"typedef "
+						};
+
+						bool should_skip = false;
+
+						for (const auto& k : skip_keywords) {
+							if (new_field_line.find(k) != std::string::npos) {
+								should_skip = true;
+							}
+						}
+
+						if (should_skip) {
+							continue;
+						}
+
+						std::string field_name;
+						std::string field_type;
+
+						std::size_t field_name_beginning = std::string::npos;
+						std::size_t field_name_ending = std::string::npos;
+						
+						const auto found_eq = new_field_line.find("=");
+
+						if (found_eq != std::string::npos) {
+							field_name_ending = new_field_line.find(" =");
+							errcheck(field_name_ending != std::string::npos);
+							field_name_beginning = new_field_line.rfind(" ", field_name_ending - 1) + 1;
+						}
+						else {
+							field_name_ending = new_field_line.find(";");
+							errcheck(field_name_ending != std::string::npos);
+							field_name_beginning = new_field_line.rfind(" ", field_name_ending) + 1;
+						}
+						
+						field_name = new_field_line.substr(
+							field_name_beginning, field_name_ending - field_name_beginning
+						);
+
+						const auto field_type_beginning = new_field_line.find_first_not_of(" \t\r");
+
+						field_type = new_field_line.substr(
+							field_type_beginning,
+							field_name_beginning - field_type_beginning - 1 // peel off the trailing space
+						);
+
+						errcheck(field_name.find_first_of("[]") == std::string::npos);
+
+						generated_fields += typesafe_sprintf(
+							introspector_field_format,
+							field_name,
+							field_type
+						);
 					}
-					
-					field_name = new_field_line.substr(
-						field_name_beginning, field_name_ending - field_name_beginning
-					);
-
-					const auto field_type_beginning = new_field_line.find_first_not_of(" \t\r");
-
-					field_type = new_field_line.substr(
-						field_type_beginning,
-						field_name_beginning - field_type_beginning - 1 // peel off the trailing space
-					);
-
-					errcheck(field_name.find_first_of("[]") == std::string::npos);
-
-					generated_fields += typesafe_sprintf(
-						introspector_field_format,
-						field_name,
-						field_type
-					);
 				}
 
-				generated_introspectors += typesafe_sprintf(
-					introspector_body_format,
-					template_template_arguments,
-					typesafe_sprintf("const %x* const", type_name),
-					//type_name,
-					generated_fields
-				);
+				if (is_enum) {
+					generated_enums += typesafe_sprintf(
+						enum_introspector_body_format,
+						type_name,
+						generated_fields
+					);
+				}
+				else {
+					generated_introspectors += typesafe_sprintf(
+						introspector_body_format,
+						template_template_arguments,
+						typesafe_sprintf("const %x* const", type_name),
+						//type_name,
+						generated_fields
+					);
+				}
 			}
 
 			++current_line;
@@ -320,6 +367,7 @@ int main(int argc, char** argv) {
 		typesafe_sprintf(
 			generated_file_format, 
 			make_namespaces(),
+			generated_enums,
 			generated_introspectors
 		)
 	);

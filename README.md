@@ -117,11 +117,11 @@ Given this output file format:
 
 ```cpp
 #pragma once
-
+%x
 %xstruct introspection_access {
 %x};
  ```
-where ```%x```  are the places where the generator will put forward declarations and resultant introspectors respectively, and given this introspector body format:
+where ```%x```  are the places where the generator will put forward declarations, generated enums and resultant introspectors respectively, and given this introspector body format:
 ```cpp
 	template <class F%x, class... MemberInstances>
 	static void introspect_body(

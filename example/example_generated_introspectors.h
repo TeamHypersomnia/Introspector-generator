@@ -2,7 +2,6 @@
 #define FIELD(x) f(#x, _t_.x...)
 
 // Forward declarations
-
 struct c;
 class a;
 template <class id_type>
@@ -11,6 +10,33 @@ template <class id_type>
 struct derived;
 
 namespace augs {
+	const char* enum_to_string(const EN1 e) {
+		switch(e) {
+		case EN1::A: return "A";
+		case EN1::B: return "B";
+		case EN1::C: return "C";
+		default: return "Invalid";
+		}
+	}
+
+	const char* enum_to_string(const EN2 e) {
+		switch(e) {
+		case EN2::DASD: return "DASD";
+		case EN2::f34879078: return "f34879078";
+		case EN2::EF: return "EF";
+		default: return "Invalid";
+		}
+	}
+
+	const char* enum_to_string(const myn::EN3 e) {
+		switch(e) {
+		case myn::EN3::asdad: return "asdad";
+		case myn::EN3::fdsfsfds: return "fdsfsfds";
+		case myn::EN3::EfsdfdsfsF: return "EfsdfdsfsF";
+		default: return "Invalid";
+		}
+	}
+
 	struct introspection_access {
 		/* Generated introspectors begin here */
 
