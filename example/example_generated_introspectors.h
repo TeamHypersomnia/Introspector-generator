@@ -26,6 +26,15 @@ namespace augs {
 		}
 	}
 
+	template <class F>
+	void enum_to_args_impl(const EN1, F f) {
+		f(
+			EN1::A,
+			EN1::B,
+			EN1::C
+		);
+	}
+
 	template <class... T>
 	const char* enum_to_string(const EN2 e, T...) {
 		switch(e) {
@@ -36,6 +45,15 @@ namespace augs {
 		}
 	}
 
+	template <class F>
+	void enum_to_args_impl(const EN2, F f) {
+		f(
+			EN2::DASD,
+			EN2::f34879078,
+			EN2::EF
+		);
+	}
+
 	template <class... T>
 	const char* enum_to_string(const myn::EN3 e, T...) {
 		switch(e) {
@@ -44,6 +62,15 @@ namespace augs {
 		case myn::EN3::EfsdfdsfsF: return "EfsdfdsfsF";
 		default: return "Invalid";
 		}
+	}
+
+	template <class F>
+	void enum_to_args_impl(const myn::EN3, F f) {
+		f(
+			myn::EN3::asdad,
+			myn::EN3::fdsfsfds,
+			myn::EN3::EfsdfdsfsF
+		);
 	}
 
 	struct introspection_access {

@@ -29,6 +29,8 @@ int main(int argc, char** argv) {
 	std::string introspector_body_format;
 	std::string enum_field_format;
 	std::string enum_introspector_body_format;
+	std::string enum_arg_format;
+	std::string enum_to_args_body_format;
 	std::string generated_file_format;
 
 	{
@@ -49,6 +51,8 @@ int main(int argc, char** argv) {
 				"introspector-body-format:",
 				"enum-field-format:",
 				"enum-introspector-body-format:",
+				"enum-arg-format:",
+				"enum-to-args-body-format:",
 				"generated-file-format:"
 			}
 		);
@@ -66,6 +70,8 @@ int main(int argc, char** argv) {
 		introspector_body_format = lines_to_string(lines_per_prop[i++]);
 		enum_field_format = lines_to_string(lines_per_prop[i++]);
 		enum_introspector_body_format = lines_to_string(lines_per_prop[i++]);
+		enum_arg_format = lines_to_string(lines_per_prop[i++]);
+		enum_to_args_body_format = lines_to_string(lines_per_prop[i++]);
 		generated_file_format = lines_to_string(lines_per_prop[i++]);
 	}
 	
@@ -235,6 +241,12 @@ int main(int argc, char** argv) {
 				}
 
 				std::string generated_fields;
+				std::string generated_enum_args;
+
+				auto redirect_line = [&](const std::string& line) {
+					generated_fields += line + '\n';
+					generated_enum_args += line + '\n';
+				};
 
 				while (true) {
 					++current_line;
@@ -246,12 +258,12 @@ int main(int argc, char** argv) {
 					}
 					
 					if (new_field_line[0] == '#') {
-						generated_fields += new_field_line + "\n";
+						redirect_line(new_field_line);
 						continue;
 					}
 
 					if (std::all_of(new_field_line.begin(), new_field_line.end(), isspace)) {
-						generated_fields += new_field_line + "\n";
+						redirect_line(new_field_line);
 						continue;
 					}
 
@@ -272,6 +284,12 @@ int main(int argc, char** argv) {
 							type_name,
 							field_name,
 							field_name
+						);
+
+						generated_enum_args += typesafe_sprintf(
+							enum_arg_format,
+							type_name,
+							field_name + ","
 						);
 					}
 					else {
@@ -354,6 +372,16 @@ int main(int argc, char** argv) {
 						enum_introspector_body_format,
 						type_name,
 						generated_fields
+					);
+
+					if (generated_enum_args.size() > 0) {
+						generated_enum_args.erase(generated_enum_args.begin() + generated_enum_args.rfind(',')); // peel off the trailing comma
+					}
+
+					generated_enums += typesafe_sprintf(
+						enum_to_args_body_format,
+						type_name,
+						generated_enum_args
 					);
 				}
 				else {
