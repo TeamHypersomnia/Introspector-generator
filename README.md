@@ -77,6 +77,7 @@ f;
 are examples of wrong usage.
 * C-style arrays. Use std::array instead.
 * Functions of any kind.
+* Comments.
 
 Example:
 
