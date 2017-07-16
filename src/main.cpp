@@ -187,6 +187,11 @@ int main(int argc, char** argv) {
 
 					for (size_t a = 0; a < template_arguments.size(); ++a) {
 						argument_template_arguments += template_arguments[a].second;
+						
+						if (template_arguments[a].first.find("...") != std::string::npos) {
+							argument_template_arguments += "...";
+						}
+
 						template_template_arguments += template_arguments[a].first + " " + template_arguments[a].second;
 
 						if (a != template_arguments.size() - 1) {

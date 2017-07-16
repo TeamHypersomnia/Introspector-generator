@@ -10,6 +10,10 @@ template <class id_type>
 struct base;
 template <class id_type>
 struct derived;
+template <class T, class... Types>
+struct base_many;
+template <class T, class... Types>
+struct derived_many;
 
 namespace myn {
 	enum class EN3;
@@ -121,6 +125,26 @@ namespace augs {
 		) {
 			introspect_body(static_cast<base<id_type>*>(nullptr), f, std::forward<Instances>(_t_)...);
 			FIELD(container_entity);
+		}
+
+		template <class F, class T, class... Types, class... Instances>
+		static void introspect_body(
+			const base_many<T, Types...>* const,
+			F f,
+			Instances&&... _t_
+		) {
+			FIELD(base_field);
+			FIELD(other_base_field);
+		}
+
+		template <class F, class T, class... Types, class... Instances>
+		static void introspect_body(
+			const derived_many<T, Types...>* const,
+			F f,
+			Instances&&... _t_
+		) {
+			introspect_body(static_cast<base_many<T, Types...>*>(nullptr), f, std::forward<Instances>(_t_)...);
+			FIELD(t);
 		}
 
 	};
