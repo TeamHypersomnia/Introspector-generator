@@ -2,7 +2,7 @@
 #include <sstream>
 #include <limits>
 #include <fstream>
-#include <experimental\filesystem>
+#include <experimental/filesystem>
 
 template<class Str, class Repl>
 auto replace_all(Str str, Repl _from, Repl _to) {
