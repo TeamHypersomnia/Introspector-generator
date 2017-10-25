@@ -4,6 +4,8 @@
 #include "spellbook.h"
 
 int main(int argc, char** argv) {
+	static_assert("C++17");
+
 	ensure(argc >= 2 && "usage: configuration_file_input_path");
 
 	const std::string configuration_file_input_path = argv[1];

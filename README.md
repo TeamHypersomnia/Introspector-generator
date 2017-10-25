@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/TeamHypersomnia/Introspector-generator.svg?branch=master)](https://travis-ci.org/TeamHypersomnia/Introspector-generator)
+
 # Introspector-generator
 Small utility that generates introspector functions into a separate file, from comments in the code.
 
