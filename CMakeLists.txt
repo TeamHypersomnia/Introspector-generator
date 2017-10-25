@@ -3,9 +3,13 @@ message("Building Introspector-generator.")
 
 if(UNIX)
 	message("Unix build.")
-	
+
 	set(CMAKE_CXX_FLAGS
-		"${CMAKE_CXX_FLAGS} -std=gnu++1z -lstdc++fs -fpermissive"
+		"${CMAKE_CXX_FLAGS} -std=gnu++1z -fpermissive"
+	)
+
+	set(CMAKE_EXE_LINKER_FLAGS
+		"${CMAKE_EXE_LINKER_FLAGS} -lstdc++fs"
 	)
 elseif(MSVC)
 	message("MSVC build.")
