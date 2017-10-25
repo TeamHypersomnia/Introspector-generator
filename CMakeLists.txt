@@ -1,12 +1,20 @@
+cmake_minimum_required(VERSION 3.8)
+
 project(Introspector-generator)
 
-set(CMAKE_CXX_FLAGS
- "${CMAKE_CXX_FLAGS} /Ob2 /GL /Oi /O2 /permissive-"
-)
-
-set(CMAKE_EXE_LINKER_FLAGS
- "${CMAKE_EXE_LINKER_FLAGS} /LTCG"
-)
+if(MSVC)
+	set(CMAKE_CXX_FLAGS
+		"${CMAKE_CXX_FLAGS} /Ob2 /GL /Oi /O2 /permissive- /std:c++latest"
+	)
+	
+	set(CMAKE_EXE_LINKER_FLAGS
+	 "${CMAKE_EXE_LINKER_FLAGS} /LTCG"
+	)
+elseif(UNIX)
+	set(CMAKE_CXX_FLAGS
+		"${CMAKE_CXX_FLAGS} -std=gnu++1z -lstdc++fs -fpermissive"
+	)
+endif()
 
 add_executable(Introspector-generator "src/main.cpp")
 
