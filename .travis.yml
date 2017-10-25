@@ -20,3 +20,6 @@ script:
   - make --dry-run
   - make VERBOSE=1
   - ./Introspector-generator
+  
+notfications:
+  email: false
