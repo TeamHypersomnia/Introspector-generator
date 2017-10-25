@@ -1,7 +1,7 @@
 project(Introspector-generator)
 
 set(CMAKE_CXX_FLAGS
- "${CMAKE_CXX_FLAGS} /Ob2 /GL /Oi /O2"
+ "${CMAKE_CXX_FLAGS} /Ob2 /GL /Oi /O2 /permissive-"
 )
 
 set(CMAKE_EXE_LINKER_FLAGS
