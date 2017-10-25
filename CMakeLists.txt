@@ -1,16 +1,21 @@
 project(Introspector-generator)
+message("Building Introspector-generator.")
 
-if(MSVC)
+if(UNIX)
+	message("Unix build.")
+	
+	set(CMAKE_CXX_FLAGS
+		"${CMAKE_CXX_FLAGS} -std=gnu++1z -lstdc++fs -fpermissive"
+	)
+elseif(MSVC)
+	message("MSVC build.")
+	
 	set(CMAKE_CXX_FLAGS
 		"${CMAKE_CXX_FLAGS} /Ob2 /GL /Oi /O2 /permissive- /std:c++latest"
 	)
 	
 	set(CMAKE_EXE_LINKER_FLAGS
-	 "${CMAKE_EXE_LINKER_FLAGS} /LTCG"
-	)
-elseif(UNIX)
-	set(CMAKE_CXX_FLAGS
-		"${CMAKE_CXX_FLAGS} -std=gnu++1z -lstdc++fs -fpermissive"
+		"${CMAKE_EXE_LINKER_FLAGS} /LTCG"
 	)
 endif()
 
