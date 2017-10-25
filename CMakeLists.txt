@@ -7,8 +7,6 @@ if(UNIX)
 	set(CMAKE_CXX_FLAGS
 		"${CMAKE_CXX_FLAGS} -std=gnu++1z -fpermissive"
 	)
-
-	target_link_libraries(Introspector-generator stdc++fs)
 elseif(MSVC)
 	message("MSVC build.")
 	
@@ -23,6 +21,10 @@ endif()
 
 add_executable(Introspector-generator "src/main.cpp")
 
+if(UNIX)
+	target_link_libraries(Introspector-generator stdc++fs)
+endif()
+
 if(MSVC)
 	# if you want to run the program on examples/input.cfg,
 	# ensure that you run it with "input.cfg" in the command arguments.
@@ -33,4 +35,3 @@ if(MSVC)
 
 	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Introspector-generator)
 endif()
- 
