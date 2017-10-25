@@ -8,9 +8,7 @@ if(UNIX)
 		"${CMAKE_CXX_FLAGS} -std=gnu++1z -fpermissive"
 	)
 
-	set(CMAKE_EXE_LINKER_FLAGS
-		"${CMAKE_EXE_LINKER_FLAGS} -lstdc++fs"
-	)
+	target_link_libraries(Introspector-generator stdc++fs)
 elseif(MSVC)
 	message("MSVC build.")
 	
