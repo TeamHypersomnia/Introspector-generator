@@ -7,7 +7,10 @@
 int main(int argc, char** argv) {
 	static_assert("C++17");
 
-	ensure(argc >= 2 && "usage: configuration_file_input_path");
+	if(!(argc >= 2)) {
+		std::cout << "usage: configuration_file_input_path" << std::endl;
+		return 0;
+	}
 
 	const std::string configuration_file_input_path = argv[1];
 
