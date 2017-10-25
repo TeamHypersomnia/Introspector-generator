@@ -7,7 +7,9 @@
 int main(int argc, char** argv) {
 	static_assert("C++17");
 
-	if(!(argc >= 2)) {
+	if (const auto cxx17iftest = !(argc >= 2);
+		cxx17iftest
+	) {
 		std::cout << "usage: configuration_file_input_path" << std::endl;
 		return 0;
 	}
