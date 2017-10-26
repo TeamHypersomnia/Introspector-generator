@@ -3,6 +3,47 @@
 #include <limits>
 #include <fstream>
 #include <experimental/filesystem>
+#include <type_traits>
+
+namespace augs {
+	template <class F>
+	class scope_guard {
+	public:
+		scope_guard(F&& exit_function) : 
+			exit_function(std::move(exit_function))
+		{}
+
+		scope_guard(scope_guard&& f) :
+			exit_function(std::move(f.exit_function)),
+			execute_on_destruction(f.execute_on_destruction) 
+		{
+			f.release();
+		}
+
+		~scope_guard() {
+			if (execute_on_destruction) {
+				exit_function();
+			}
+		}
+
+		void release() {
+			execute_on_destruction = false;
+		}
+
+		scope_guard(const scope_guard&) = delete;
+		scope_guard& operator=(const scope_guard&) = delete;
+		scope_guard& operator=(scope_guard&&) = delete;
+
+	private:
+		F exit_function;
+		bool execute_on_destruction = true;
+	};
+
+	template <class F>
+	scope_guard<F> make_scope_guard(F&& exit_function) {
+		return scope_guard<F>{std::forward<F>(exit_function)};
+	}
+}
 
 template<class Str, class Repl>
 auto replace_all(Str str, Repl _from, Repl _to) {
@@ -136,12 +177,6 @@ void LOG(const std::string& f) {
 	std::cout << f;
 }
 
-#define ensure(x) if(!(x))\
-{\
-    LOG( "ensure(%x) failed\nfile: %x\nline: %x", #x, __FILE__, __LINE__ );\
-	std::getchar(); \
-}
-
 auto lines_to_string(
 	const std::vector<std::string>& lines
 ) {
@@ -167,7 +202,10 @@ auto break_lines_by_properties(
 		auto get_line_until = make_get_line_until(lines, i);
 
 		const bool first_property_name_matches = lines[i++] == properties[p++];
-		ensure(first_property_name_matches);
+
+		if (!first_property_name_matches) {
+			throw std::exception();
+		}
 
 		for (; p < properties.size(); ++p) {
 			std::vector<std::string> new_property_content;
@@ -189,7 +227,9 @@ auto break_lines_by_properties(
 			lines_per_property.push_back(new_property_content);
 		}
 
-		ensure(lines_per_property.size() == properties.size());
+		if (lines_per_property.size() != properties.size()) {
+			throw std::exception();
+		}
 	}
 
 	return lines_per_property;
