@@ -317,14 +317,12 @@ int main(int argc, char** argv) {
 
 							generated_fields += typesafe_sprintf(
 								enum_field_format,
-								type_name,
 								field_name,
 								field_name
 							);
 
 							generated_enum_args += typesafe_sprintf(
 								enum_arg_format,
-								type_name,
 								field_name + ","
 							);
 						}
