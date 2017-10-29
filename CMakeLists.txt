@@ -1,17 +1,20 @@
 cmake_minimum_required(VERSION 3.2)
 
 project(Introspector-generator)
-message("Building Introspector-generator.")
 
 if(UNIX)
-	message("Unix build.")
+	message("Building Introspector-generator for UNIX systems.")
+elseif(MSVC)
+	message("Building Introspector-generator for Windows systems.")
+else()
+	message("Unknown system.")
+endif()
 
+if(UNIX)
 	set(CMAKE_CXX_FLAGS
-		"${CMAKE_CXX_FLAGS} -std=gnu++1z -fpermissive"
+		"${CMAKE_CXX_FLAGS} -std=gnu++1z"
 	)
 elseif(MSVC)
-	message("MSVC build.")
-	
 	set(CMAKE_CXX_FLAGS
 		"${CMAKE_CXX_FLAGS} /Ob2 /GL /Oi /O2 /permissive- /std:c++latest"
 	)
