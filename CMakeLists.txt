@@ -9,10 +9,13 @@ elseif(MSVC)
 else()
 	message("Unknown system.")
 endif()
+  
+set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 if(UNIX)
 	set(CMAKE_CXX_FLAGS
-		"${CMAKE_CXX_FLAGS} -std=gnu++1z"
+		"${CMAKE_CXX_FLAGS} -std=gnu++1z -static -s"
 	)
 elseif(MSVC)
 	set(CMAKE_CXX_FLAGS

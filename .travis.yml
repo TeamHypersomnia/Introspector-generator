@@ -17,8 +17,7 @@ script:
   - gcc -v && g++ -v && cmake --version
   # Run your build commands next
   - cmake -DUNIX=ON -D CMAKE_C_COMPILER=gcc-7 -D CMAKE_CXX_COMPILER=g++-7 CMakeLists.txt
-  - make --dry-run
-  - make VERBOSE=1
+  - make --keep-going VERBOSE=1
   - ./Introspector-generator
   
 notfications:
