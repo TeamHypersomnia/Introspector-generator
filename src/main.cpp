@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 		cxx17iftest
 	) {
 		std::cout << "usage: configuration_file_input_path" << std::endl;
-		return 0;
+		return 1;
 	}
 
 	const std::string configuration_file_input_path = argv[1];
@@ -452,5 +452,5 @@ int main(int argc, char** argv) {
 	std::cout << "Success\nWritten the generated introspectors to:\n" << generated_file_path << std::endl;
 	std::cout << "Lines: " << std::count(generated_file.begin(), generated_file.end(), '\n') << std::endl;
 
-	return 0;
+	return 1;
 }

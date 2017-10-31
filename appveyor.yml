@@ -23,3 +23,4 @@ before_build:
 
 test_script:
   - ps: '& "$env:CONFIGURATION/Introspector-generator.exe"'
+  - ps: 'if($LastExitCode -ne 0) { $host.SetShouldExit($LastExitCode ) }'
