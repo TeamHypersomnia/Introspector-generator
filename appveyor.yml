@@ -20,3 +20,6 @@ before_build:
   - mkdir dev
   - cd dev
   - cmake ..
+
+test_script:
+  - ps: '& "$env:CONFIGURATION/Introspector-generator.exe"'
