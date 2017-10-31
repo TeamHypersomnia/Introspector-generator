@@ -8,7 +8,13 @@ configuration: Release
 build:
   parallel: true                  # enable MSBuild parallel builds
   project: dev/Introspector-generator.sln      # path to Visual Studio solution or project
-  verbosity: detailed
+  verbosity: normal
+
+test:
+  assemblies:
+    only:
+      - '**\*.Introspector-generator.exe'
+      - '**\*.Introspector-generator-Debug.exe'
 
 before_build:
   - mkdir dev
