@@ -1,6 +1,8 @@
-[![Build Status](https://travis-ci.org/TeamHypersomnia/Introspector-generator.svg?branch=master)](https://travis-ci.org/TeamHypersomnia/Introspector-generator)
-
 # Introspector-generator
+
+[![Build Status](https://travis-ci.org/TeamHypersomnia/Introspector-generator.svg?branch=master)](https://travis-ci.org/TeamHypersomnia/Introspector-generator)
+[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/gj4yu5c9dmbtdke8?svg=true)](https://ci.appveyor.com/project/geneotech/introspector-generator)
+
 Small utility that generates introspector functions into a separate file, from comments in the code.
 
 It is currently used to generate type information for my open-source shooter [Hypersomnia][3].

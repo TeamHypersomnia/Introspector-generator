@@ -4,7 +4,6 @@ branches:
     - master
 
 image: Visual Studio 2017 Preview
-platform: Any CPU
 configuration: Release
 build:
   parallel: true                  # enable MSBuild parallel builds
