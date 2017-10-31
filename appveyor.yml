@@ -1,0 +1,17 @@
+version: 1.0.{build}
+branches:
+  only:
+    - master
+
+image: Visual Studio 2017 Preview
+platform: Any CPU
+configuration: Release
+build:
+  parallel: true                  # enable MSBuild parallel builds
+  project: dev/Introspector-generator.sln      # path to Visual Studio solution or project
+  verbosity: detailed
+
+before_build:
+  - mkdir dev
+  - cd dev
+  - cmake ..
