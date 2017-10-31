@@ -10,6 +10,14 @@ build:
   project: dev/Introspector-generator.sln      # path to Visual Studio solution or project
   verbosity: normal
 
+notifications:
+  - provider: Email
+    to:
+      - some@email.com
+    on_build_success: false
+    on_build_failure: false
+    on_build_status_changed: false
+    
 test:
   assemblies:
     only:
