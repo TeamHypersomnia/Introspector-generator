@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 		const std::string& path,
 		const std::string& new_contents
 		) {
-		if (!fs::exists(path) || get_file_contents(path) != new_contents) {
+		if (!fs::exists(path) || file_to_string(path) != new_contents) {
 			create_text_file(path, new_contents);
 		}
 	};

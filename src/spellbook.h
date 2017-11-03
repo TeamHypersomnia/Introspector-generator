@@ -130,7 +130,7 @@ void debugbreak() {
 	exit(0);
 }
 
-std::string get_file_contents(std::string path) {
+std::string file_to_string(std::string path) {
 	if (!fs::exists(path)) {
 		std::cout << typesafe_sprintf("File %x does not exist!", path);
 		debugbreak();
