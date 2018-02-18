@@ -15,7 +15,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 if(UNIX)
 	set(CMAKE_CXX_FLAGS
-		"${CMAKE_CXX_FLAGS} -std=gnu++1z -static -s"
+		"${CMAKE_CXX_FLAGS} -std=gnu++1z"
 	)
 elseif(MSVC)
 	set(CMAKE_CXX_FLAGS
