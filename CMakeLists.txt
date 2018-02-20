@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.2)
 
 project(Introspector-generator)
 
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+	message("Building with Clang.")
+	set(CLANG ON)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	message("Building with gcc.")
+	set(GCC ON)
+elseif(MSVC)
+	message("Building with MSVC.")
+else()
+	message("Unknown compiler: ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
 if(UNIX)
 	message("Building Introspector-generator for UNIX systems.")
 elseif(MSVC)
@@ -27,9 +39,19 @@ elseif(MSVC)
 	)
 endif()
 
+if (CLANG)
+	set(CMAKE_CXX_FLAGS
+		"${CMAKE_CXX_FLAGS} -std=gnu++1z -stdlib=libc++"
+	)
+endif()
+
 add_executable(Introspector-generator "src/main.cpp")
 
-if(UNIX)
+if (CLANG)
+	target_link_libraries(Introspector-generator c++experimental c++ c++abi m c gcc_s gcc)
+endif()
+
+if(GCC)
 	target_link_libraries(Introspector-generator stdc++fs)
 endif()
 

@@ -1,11 +1,11 @@
 #pragma once
+#include <type_traits>
+#include <string>
 #include <sstream>
-#include <limits>
 #include <fstream>
 #include <experimental/filesystem>
+#include <limits>
 #include <vector>
-#include <string>
-#include <type_traits>
 
 namespace augs {
 	template <class F>
