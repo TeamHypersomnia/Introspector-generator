@@ -3,6 +3,8 @@
 #include <limits>
 #include <fstream>
 #include <experimental/filesystem>
+#include <vector>
+#include <string>
 #include <type_traits>
 
 namespace augs {
