@@ -2,6 +2,7 @@
 #include <iostream>
 #include <map>
 #include <chrono>
+#include <variant>
 
 #include "spellbook.h"
 
@@ -452,5 +453,7 @@ int main(int argc, char** argv) {
 	std::cout << "Success\nWritten the generated introspectors to:\n" << generated_file_path << std::endl;
 	std::cout << "Lines: " << std::count(generated_file.begin(), generated_file.end(), '\n') << std::endl;
 
-	return 0;
+	std::variant<int, double> variant_test;
+	variant_test = 0;
+	return std::get<int>(variant_test);
 }

@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.2)
 project(Introspector-generator)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	message("Building with Clang.")
+	message("Building with Clang (${CMAKE_CXX_COMPILER}).")
 	set(CLANG ON)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	message("Building with gcc.")
+	message("Building with gcc (${CMAKE_CXX_COMPILER}).")
 	set(GCC ON)
 elseif(MSVC)
 	message("Building with MSVC.")
@@ -40,18 +40,18 @@ elseif(MSVC)
 endif()
 
 if (CLANG)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld ")
+
 	set(CMAKE_CXX_FLAGS
-		"${CMAKE_CXX_FLAGS} -std=gnu++1z -stdlib=libc++"
+		"${CMAKE_CXX_FLAGS} -stdlib=libc++"
 	)
 endif()
 
 add_executable(Introspector-generator "src/main.cpp")
 
 if (CLANG)
-	target_link_libraries(Introspector-generator c++experimental c++ c++abi m c gcc_s gcc)
-endif()
-
-if(GCC)
+	target_link_libraries(Introspector-generator c++experimental)
+elseif(GCC)
 	target_link_libraries(Introspector-generator stdc++fs)
 endif()
 
