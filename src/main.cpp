@@ -39,12 +39,10 @@ int main(int argc, char** argv) {
 
 	std::string beginning_line;
 	std::string ending_line;
-	std::string introspect_base_line;
 	std::vector<std::string> header_directories;
 	std::vector<std::string> header_files;
 	std::string generated_file_path;
 	std::string introspector_field_format;
-	std::string base_introspector_field_format;
 	std::string introspector_body_format;
 	std::string enum_field_format;
 	std::string enum_introspector_body_format;
@@ -65,12 +63,10 @@ int main(int argc, char** argv) {
 				{
 					"beginning-line:",
 					"ending-line:",
-					"introspect-base-line:",
 					"header-directories:",
 					"header-files:",
 					"generated-file-path:",
 					"introspector-field-format:",
-					"base-introspector-field-format:",
 					"introspector-body-format:",
 					"enum-field-format:",
 					"enum-introspector-body-format:",
@@ -84,12 +80,10 @@ int main(int argc, char** argv) {
 
 			beginning_line = lines_per_prop[i++][0];
 			ending_line = lines_per_prop[i++][0];
-			introspect_base_line = lines_per_prop[i++][0];
 			header_directories = lines_per_prop[i++];
 			header_files = lines_per_prop[i++];
 			generated_file_path = lines_per_prop[i++][0];
 			introspector_field_format = lines_to_string(lines_per_prop[i++]);
-			base_introspector_field_format = lines_to_string(lines_per_prop[i++]);
 			introspector_body_format = lines_to_string(lines_per_prop[i++]);
 			enum_field_format = lines_to_string(lines_per_prop[i++]);
 			enum_introspector_body_format = lines_to_string(lines_per_prop[i++]);
@@ -328,19 +322,6 @@ int main(int argc, char** argv) {
 							);
 						}
 						else {
-							const auto found_base_gen_begin = new_field_line.find(introspect_base_line);
-
-							if (found_base_gen_begin != std::string::npos) {
-								const auto base_type_name = new_field_line.substr(1 + found_base_gen_begin + introspect_base_line.length());
-
-								generated_fields += typesafe_sprintf(
-									base_introspector_field_format,
-									base_type_name
-								);
-
-								continue;
-							}
-
 							static const std::string skip_keywords[] = {
 								"private:",
 								"protected:",
