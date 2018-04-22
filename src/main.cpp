@@ -42,8 +42,10 @@ int main(int argc, char** argv) {
 	std::vector<std::string> header_directories;
 	std::vector<std::string> header_files;
 	std::string generated_file_path;
+	std::string generated_specializations_path;
 	std::string introspector_field_format;
 	std::string introspector_body_format;
+	std::string specialized_list_format;
 	std::string enum_field_format;
 	std::string enum_introspector_body_format;
 	std::string enum_arg_format;
@@ -66,8 +68,10 @@ int main(int argc, char** argv) {
 					"header-directories:",
 					"header-files:",
 					"generated-file-path:",
+					"generated-specializations-path:",
 					"introspector-field-format:",
 					"introspector-body-format:",
+					"specialized-list-format:",
 					"enum-field-format:",
 					"enum-introspector-body-format:",
 					"enum-arg-format:",
@@ -83,8 +87,10 @@ int main(int argc, char** argv) {
 			header_directories = lines_per_prop[i++];
 			header_files = lines_per_prop[i++];
 			generated_file_path = lines_per_prop[i++][0];
+			generated_specializations_path = lines_per_prop[i++][0];
 			introspector_field_format = lines_to_string(lines_per_prop[i++]);
 			introspector_body_format = lines_to_string(lines_per_prop[i++]);
+			specialized_list_format = lines_to_string(lines_per_prop[i++]);
 			enum_field_format = lines_to_string(lines_per_prop[i++]);
 			enum_introspector_body_format = lines_to_string(lines_per_prop[i++]);
 			enum_arg_format = lines_to_string(lines_per_prop[i++]);
@@ -101,6 +107,7 @@ int main(int argc, char** argv) {
 	std::vector<std::string> generated_files_for_inclusion;
 
 	std::string generated_introspectors;
+	std::string generated_specializations;
 	std::string generated_enums;
 
 	std::map<std::string, std::string> namespaces;
@@ -418,8 +425,11 @@ int main(int argc, char** argv) {
 							template_template_arguments,
 							typesafe_sprintf("const %x* const", type_name),
 							//type_name,
-							generated_fields,
+							generated_fields
+						);
 
+						generated_specializations += typesafe_sprintf(
+							specialized_list_format,
 							template_template_arguments,
 							type_name,
 							generated_fields_list
@@ -445,6 +455,11 @@ int main(int argc, char** argv) {
 	guarded_create_file(
 		generated_file_path,
 		generated_file
+	);
+
+	guarded_create_file(
+		generated_specializations_path,
+		generated_specializations
 	);
 
 	std::cout << "Success\nWritten the generated introspectors to:\n" << generated_file_path << std::endl;
