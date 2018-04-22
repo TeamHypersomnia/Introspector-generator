@@ -272,10 +272,13 @@ int main(int argc, char** argv) {
 					}
 
 					std::string generated_fields;
+					std::string generated_fields_list;
 					std::string generated_enum_args;
+					int num_generated_fields = 0;
 
-					auto redirect_line = [&](const std::string& line) {
+					auto redirect_line_intact = [&](const std::string& line) {
 						generated_fields += line + '\n';
+						generated_fields_list += line + '\n';
 						generated_enum_args += line + '\n';
 					};
 
@@ -289,12 +292,12 @@ int main(int argc, char** argv) {
 						}
 						
 						if (new_field_line[0] == '#') {
-							redirect_line(new_field_line);
+							redirect_line_intact(new_field_line);
 							continue;
 						}
 
 						if (std::all_of(new_field_line.begin(), new_field_line.end(), isspace)) {
-							redirect_line(new_field_line);
+							redirect_line_intact(new_field_line);
 							continue;
 						}
 
@@ -380,6 +383,15 @@ int main(int argc, char** argv) {
 								field_name,
 								field_type
 							);
+
+							auto new_field = typesafe_sprintf("TYPEOF(%x)\n", field_name);
+
+							if (num_generated_fields > 0) {
+								new_field = ", " + new_field;
+							}
+
+							generated_fields_list += new_field;
+							++num_generated_fields;
 						}
 					}
 
@@ -406,7 +418,11 @@ int main(int argc, char** argv) {
 							template_template_arguments,
 							typesafe_sprintf("const %x* const", type_name),
 							//type_name,
-							generated_fields
+							generated_fields,
+
+							template_template_arguments,
+							type_name,
+							generated_fields_list
 						);
 					}
 				}
