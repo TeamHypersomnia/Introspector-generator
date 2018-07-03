@@ -441,7 +441,9 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
-	catch (...) {
+	catch (std::exception err) {
+		std::cout << "Exception thrown during header processing: " << err.what() << std::endl;
+		std::cout << "------------\nIntrospector-generator run failed." << std::endl;
 		return 1;
 	}
 
