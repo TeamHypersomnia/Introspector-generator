@@ -50,7 +50,7 @@ endif()
 add_executable(Introspector-generator "src/main.cpp")
 
 if (CLANG)
-	target_link_libraries(Introspector-generator c++experimental)
+	target_link_libraries(Introspector-generator c++fs c++experimental)
 elseif(GCC)
 	target_link_libraries(Introspector-generator stdc++fs)
 endif()
