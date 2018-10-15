@@ -405,7 +405,7 @@ int main(int argc, char** argv) {
 					if (is_enum) {
 						generated_enums += typesafe_sprintf(
 							enum_introspector_body_format,
-							type_name,
+							"::" + type_name,
 							generated_fields
 						);
 
@@ -415,7 +415,7 @@ int main(int argc, char** argv) {
 
 						generated_enums += typesafe_sprintf(
 							enum_to_args_body_format,
-							type_name,
+							"::" + type_name,
 							generated_enum_args
 						);
 					}
@@ -423,7 +423,7 @@ int main(int argc, char** argv) {
 						generated_introspectors += typesafe_sprintf(
 							introspector_body_format,
 							template_template_arguments,
-							typesafe_sprintf("const %x* const", type_name),
+							typesafe_sprintf("const ::%x* const", type_name),
 							//type_name,
 							generated_fields
 						);
@@ -431,7 +431,7 @@ int main(int argc, char** argv) {
 						generated_specializations += typesafe_sprintf(
 							specialized_list_format,
 							template_template_arguments,
-							type_name,
+							"::" + type_name,
 							generated_fields_list
 						);
 					}
