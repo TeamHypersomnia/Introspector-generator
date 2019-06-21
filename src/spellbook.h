@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <limits>
 #include <vector>
 
@@ -113,7 +113,7 @@ auto typesafe_sprintf(const wchar_t* const c_str, A&&... a) {
 	return f;
 }
 
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 auto get_file_lines(const std::string& filename) {
 	std::ifstream input(filename);
