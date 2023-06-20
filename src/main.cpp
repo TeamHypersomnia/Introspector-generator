@@ -326,10 +326,12 @@ int main(int argc, char** argv) {
 								field_name
 							);
 
-							generated_enum_args += typesafe_sprintf(
-								enum_arg_format,
-								field_name + ","
-							);
+							if (enum_arg_format.size() > 0) {
+								generated_enum_args += typesafe_sprintf(
+									enum_arg_format,
+									field_name
+								);
+							}
 						}
 						else {
 							static const std::string skip_keywords[] = {
@@ -410,14 +412,20 @@ int main(int argc, char** argv) {
 						);
 
 						if (generated_enum_args.size() > 0) {
-							generated_enum_args.erase(generated_enum_args.begin() + generated_enum_args.rfind(',')); // peel off the trailing comma
+							const auto cm = generated_enum_args.rfind(',');
+
+							if (cm != std::string::npos) {
+								generated_enum_args.erase(generated_enum_args.begin() + cm); // peel off the trailing comma
+							}
 						}
 
-						generated_enums += typesafe_sprintf(
-							enum_to_args_body_format,
-							"::" + type_name,
-							generated_enum_args
-						);
+						if (enum_to_args_body_format.size() > 0) {
+							generated_enums += typesafe_sprintf(
+								enum_to_args_body_format,
+								"::" + type_name,
+								generated_enum_args
+							);
+						}
 					}
 					else {
 						generated_introspectors += typesafe_sprintf(
