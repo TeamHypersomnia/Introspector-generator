@@ -42,6 +42,7 @@ int main(int argc, char** argv) {
 	std::vector<std::string> header_directories;
 	std::vector<std::string> header_files;
 	std::string generated_file_path;
+	std::string generated_enums_path;
 	std::string generated_specializations_path;
 	std::string introspector_field_format;
 	std::string introspector_body_format;
@@ -68,6 +69,7 @@ int main(int argc, char** argv) {
 					"header-directories:",
 					"header-files:",
 					"generated-file-path:",
+					"generated-enums-path:",
 					"generated-specializations-path:",
 					"introspector-field-format:",
 					"introspector-body-format:",
@@ -87,6 +89,7 @@ int main(int argc, char** argv) {
 			header_directories = lines_per_prop[i++];
 			header_files = lines_per_prop[i++];
 			generated_file_path = lines_per_prop[i++][0];
+			generated_enums_path = lines_per_prop[i++][0];
 			generated_specializations_path = lines_per_prop[i++][0];
 			introspector_field_format = lines_to_string(lines_per_prop[i++]);
 			introspector_body_format = lines_to_string(lines_per_prop[i++]);
@@ -311,6 +314,7 @@ int main(int argc, char** argv) {
 						if (is_enum) {
 							const auto field_name_beginning = new_field_line.find_first_not_of(" \t\r");
 							errcheck(field_name_beginning != std::string::npos);
+							errcheck(new_field_line.find("=") == std::string::npos);
 
 							auto field_name_ending = new_field_line.find_first_of("=, \t\r", field_name_beginning);
 
@@ -322,9 +326,10 @@ int main(int argc, char** argv) {
 
 							generated_fields += typesafe_sprintf(
 								enum_field_format,
-								field_name,
 								field_name
 							);
+
+							++num_generated_fields;
 
 							if (enum_arg_format.size() > 0) {
 								generated_enum_args += typesafe_sprintf(
@@ -408,7 +413,9 @@ int main(int argc, char** argv) {
 						generated_enums += typesafe_sprintf(
 							enum_introspector_body_format,
 							"::" + type_name,
-							generated_fields
+							num_generated_fields,
+							generated_fields,
+							num_generated_fields
 						);
 
 						if (generated_enum_args.size() > 0) {
@@ -458,9 +465,10 @@ int main(int argc, char** argv) {
 	const auto generated_file = typesafe_sprintf(
 		generated_file_format,
 		make_namespaces(),
-		generated_enums,
 		generated_introspectors
 	);
+
+	const auto generated_enums_contents = make_namespaces() + "\n" + generated_enums;
 
 	guarded_create_file(
 		generated_file_path,
@@ -472,8 +480,14 @@ int main(int argc, char** argv) {
 		generated_specializations
 	);
 
+	guarded_create_file(
+		generated_enums_path,
+		generated_enums_contents
+	);
+
 	std::cout << "Success\nWritten the generated introspectors to:\n" << generated_file_path << std::endl;
 	std::cout << "Lines: " << std::count(generated_file.begin(), generated_file.end(), '\n') << std::endl;
+	std::cout << "Enum Lines: " << std::count(generated_enums_contents.begin(), generated_enums_contents.end(), '\n') << std::endl;
 
 	std::variant<int, double> variant_test;
 	variant_test = 0;
